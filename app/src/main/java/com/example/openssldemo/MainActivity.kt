@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
         binding.sampleText.text = stringFromJNI()
         val service = MainService()
         service.onCreate()
+        service.onStartCommand(null, 0, 0)
         val register=Register()
         register.registerApp("asda")
 //        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())

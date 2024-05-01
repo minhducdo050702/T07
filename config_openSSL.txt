@@ -1,0 +1,25 @@
+Bước 1: Tại file build.gralde cấp module trong dependencies thêm 2 dòng:
+ implementation ("com.android.ndk.thirdparty:openssl:1.1.1l-beta-1")
+ implementation ("com.android.ndk.thirdparty:curl:7.79.1-beta-1")
+Bước 2: Cũng tại file này ngay dưới compileSdk thêm dòng:
+ndkVersion = "25.1.8937393"
+Bước 3: Trong defaultConfig thêm:
+externalNativeBuild {
+            cmake  {
+
+                arguments("-DANDROID_STL=c++_shared")
+
+            }
+}
+Bước 4: Tại buildFeatures thêm:
+prefab = true
+
+Bước 5: Tại CMakeList.txt:
+tại dòng project() sửa thành project(tên project LANGUAGES CXX)
+
+dưới dòng này thêm 2 dòng:
+find_package(curl REQUIRED CONFIG)
+find_package(openssl REQUIRED CONFIG)
+
+tại cuối file này thêm dòng:
+target_link_libraries(${CMAKE_PROJECT_NAME} ${LIBLOG} curl::curl)

@@ -1,5 +1,6 @@
 package com.example.openssldemo
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -19,8 +20,19 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        if(intent != null) {
+            if(intent.action == REGISTER_ACTION) {
+                Log.d("FROM OPENSSL", "RECEIVE")
+                intent.getStringExtra(Intent.EXTRA_TEXT).let {
+                    binding.sampleText.text = it
+                }
+
+
+            }
+
+        }
         // Example of a call to a native method
-        binding.sampleText.text = stringFromJNI()
+
         val service = MainService()
         service.onCreate()
         service.onStartCommand(null, 0, 0)
@@ -51,6 +63,9 @@ class MainActivity : AppCompatActivity() {
     external fun stringFromJNI(): String
 
     companion object {
+        const val REGISTER_ACTION = "com.example.openssldemo.REGISTER"
+        const val STORAGE_ACTION = "com.example.openssldemo.STORAGE"
+        const val GET_DATA_ACTION = "com.example.openssldemo.GET_DATA"
         // Used to load the 'openssldemo' library on application startup.
         init {
             System.loadLibrary("openssldemo")

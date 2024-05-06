@@ -10,72 +10,10 @@
 #include <openssl/aes.h>
 #include <openssl/err.h>
 #include <string.h>
+#include "crypto.h"
+
 using namespace std;
-void handleErrors(void)
-{
-    unsigned long errCode;
 
-    printf("An error occurred\n");
-    errCode = ERR_get_error();
-    while(errCode)
-    {
-        char *err = ERR_error_string(errCode, NULL);
-        printf("%s\n", err);
-        errCode = ERR_get_error();
-    }
-    abort();
-}
-
-int encrypt_CBC(unsigned char *key, unsigned char *iv, unsigned char *plain, int plain_length, unsigned char *cipher) {
-    //key: 32byte 256bit
-    //iv: 16byte 128bit
-    int result = 0, encrypt = 1, outlen, len;
-    EVP_CIPHER_CTX *ctx = NULL;
-    //Init context
-    ctx = EVP_CIPHER_CTX_new();
-    if(!ctx) handleErrors();
-    //Init encryption process
-    if(!EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))handleErrors();
-    //Provider plain msg
-    if(!EVP_EncryptUpdate(ctx, cipher, &len, plain, plain_length)) handleErrors();
-
-    outlen = len;
-    //Final encryption
-    if(!EVP_EncryptFinal_ex(ctx, cipher + len, &len)) handleErrors();
-
-    outlen += len;
-
-    //Clean up
-    EVP_CIPHER_CTX_free(ctx);
-    return outlen;
-}
-
-int decrypt_CBC(unsigned char *key, unsigned char *iv, unsigned char *cipher, int cipher_len, unsigned char *plain){
-    //key: 32byte 256bit
-    //iv: 16byte 128bit
-    int len = 0, plain_len = 0, ret;
-
-    EVP_CIPHER_CTX *ctx = NULL;
-
-    ctx = EVP_CIPHER_CTX_new();
-
-    if(!ctx) handleErrors();
-
-    if(!EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))handleErrors();
-
-    if(cipher){
-        if(!EVP_DecryptUpdate(ctx, plain, &len, cipher, cipher_len))
-            handleErrors();
-        plain_len = len;
-    }
-
-    if(!EVP_DecryptFinal(ctx, plain+len, &len)) handleErrors();
-    plain_len +=len;
-
-    EVP_CIPHER_CTX_free(ctx);
-
-    return plain_len;
-}
 std::string genKey() {
     const int masterKeyLength = 32; // Master key length in bytes (256 bits)
     const int aesKeyLength = 32;    // AES key length in bytes (256 bits)
@@ -112,8 +50,6 @@ std::string genKey() {
         return "";
     }
 
-
-
     // Derive MAC key
     if (PKCS5_PBKDF2_HMAC("password", 8, macSalt, saltLength, iterations, EVP_sha256(),
                           macKeyLength, macKey) != 1) {
@@ -142,10 +78,46 @@ Java_com_example_openssldemo_MainActivity_stringFromJNI(JNIEnv *env, jobject thi
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_example_openssldemo_Register_genKey(JNIEnv *env, jobject thiz) {
+Java_com_example_openssldemo_Register_genKey(JNIEnv *env, jobject) {
     // Call the genKey function to generate the key
     std::string key = genKey();
 
     // Return the key as a Java string
     return env->NewStringUTF(key.c_str());
 }
+
+extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt_encrypt(JNIEnv *env,  jobject,
+                                                                                         jstring jKey,
+                                                                                         jstring jIv,
+                                                                                         jstring jPlainText){
+    unsigned char cipherText[1000] = "";
+    const char *key = env->GetStringUTFChars(jKey, nullptr);
+    const char *iv = env->GetStringUTFChars(jIv, nullptr);
+    const char *plainText = env->GetStringUTFChars(jPlainText, nullptr);
+
+    int plainLen = strlen(plainText);
+    int cipherLen = encrypt_CBC((unsigned char *) key, (unsigned char *) iv,
+                                (unsigned char *) plainText, plainLen, cipherText);
+
+    return env->NewStringUTF(reinterpret_cast<const char *const>(cipherText));
+}
+
+extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt_decrypt(JNIEnv *env,  jobject,
+                                                                                         jstring jKey,
+                                                                                         jstring jIv,
+                                                                                         jstring jCipherText){
+    unsigned char decryptedMsg[1000] = "";
+    const char *key = env->GetStringUTFChars(jKey, nullptr);
+    const char *iv = env->GetStringUTFChars(jIv, nullptr);
+    const char *cipherText = env->GetStringUTFChars(jCipherText, nullptr);
+
+    int cipherLen = strlen(cipherText);
+    int decryptedLen = decrypt_CBC((unsigned char *) key, (unsigned char *) iv,
+                                   (unsigned char *) cipherText, cipherLen, decryptedMsg);
+
+    if(decryptedLen < 0){
+        //LOGD("MSG is changed");
+
+    }
+
+    return env->NewStringUTF(reinterpret_cast<const char *const>(decryptedMsg));

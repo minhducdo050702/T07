@@ -23,17 +23,17 @@ import javax.crypto.spec.SecretKeySpec;
 public class Register {
     KeyStore  keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
     String password = "password";
+
     static {
-        System.loadLibrary("openssldemo");
+        Loader.load();
     }
+
     public Register() throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //load key store from file in downloads directory
             keyStore.load(new FileInputStream("/sdcard/Download/keystore.jks"), password.toCharArray());
             Log.d("Register","Keystore loaded successfully");
         }
-
-
     }
     public void registerApp(String alias) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
         String alias1=alias+" MasterKey";

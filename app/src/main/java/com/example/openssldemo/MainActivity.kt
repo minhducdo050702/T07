@@ -5,9 +5,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication2.MainService
 import com.example.openssldemo.databinding.ActivityMainBinding
-import java.io.FileInputStream
-import java.security.Key
-import java.security.KeyStore
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,7 +38,16 @@ class MainActivity : AppCompatActivity() {
 //        Log.d("MainActivity", "Master Key: $masterKey")
 //        Log.d("MainActivity", "AES Key: $AESKey")
 //        Log.d("MainActivity", "MAC Key: $MACKey")
+        Log.d("Main Activity", "hello ");
+        val crypto = EncryptDecrypt();
+        val key = "01234567890123456789012345678901";
+        val iv = "0123456789012345"
+        val plainText = "Hello World!!!!"
 
+        val cipherMsg = crypto.encrypt(key, iv, plainText)
+        val decryptedMsg = crypto.decrypt(key, iv, cipherMsg)
+        Log.d("Main Activity", "Encrypted MSG: $cipherMsg");
+        Log.d("Main Activity", "Decrypted MSG: $decryptedMsg");
     }
 
     /**

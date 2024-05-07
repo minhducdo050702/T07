@@ -15,7 +15,7 @@ void handleErrors(void)
     unsigned long errCode;
 
     printf("An error occurred\n");
-    while(errCode = ERR_get_error())
+    while(errCode == ERR_get_error())
     {
         char *err = ERR_error_string(errCode, NULL);
         printf("%s\n", err);

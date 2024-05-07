@@ -105,7 +105,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt
 extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt_decrypt(JNIEnv *env,  jobject,
                                                                                          jstring jKey,
                                                                                          jstring jIv,
-                                                                                         jstring jCipherText){
+                                                                                         jstring jCipherText) {
     unsigned char decryptedMsg[1000] = "";
     const char *key = env->GetStringUTFChars(jKey, nullptr);
     const char *iv = env->GetStringUTFChars(jIv, nullptr);
@@ -115,9 +115,10 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt
     int decryptedLen = decrypt_CBC((unsigned char *) key, (unsigned char *) iv,
                                    (unsigned char *) cipherText, cipherLen, decryptedMsg);
 
-    if(decryptedLen < 0){
+    if (decryptedLen < 0) {
         //LOGD("MSG is changed");
 
     }
 
     return env->NewStringUTF(reinterpret_cast<const char *const>(decryptedMsg));
+}

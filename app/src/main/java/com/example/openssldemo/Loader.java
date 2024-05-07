@@ -7,7 +7,7 @@ class Loader {
         if (done)
             return;
 
-        System.loadLibrary("library_name");
+        System.loadLibrary("openslldemo");
 
         done = true;
     }

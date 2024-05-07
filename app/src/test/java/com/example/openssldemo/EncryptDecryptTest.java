@@ -17,7 +17,8 @@ public class EncryptDecryptTest {
     public void encryptTest() throws KeyStoreException {
         EncryptDecrypt crypto = new EncryptDecrypt();
         String cipherMsg = crypto.encrypt(this.key, this.iv, this.plainText);
+
         String decryptedMsg = crypto.decrypt(this.key, this.iv, cipherMsg);
-        assertEquals(cipherMsg, decryptedMsg, "Msg is encrypted + decrypted");
+        assertEquals(this.plainText, decryptedMsg, "Msg is encrypted + decrypted");
     }
 }

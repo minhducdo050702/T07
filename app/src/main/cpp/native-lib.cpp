@@ -91,6 +91,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt
                                                                                          jstring jIv,
                                                                                          jstring jPlainText){
     unsigned char cipherText[1000] = "";
+
     const char *key = env->GetStringUTFChars(jKey, nullptr);
     const char *iv = env->GetStringUTFChars(jIv, nullptr);
     const char *plainText = env->GetStringUTFChars(jPlainText, nullptr);
@@ -99,7 +100,8 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt
     int cipherLen = encrypt_CBC((unsigned char *) key, (unsigned char *) iv,
                                 (unsigned char *) plainText, plainLen, cipherText);
 
-    return env->NewStringUTF(reinterpret_cast<const char *const>(cipherText));
+    std::string cipherTextHex = toHexString(cipherText, cipherLen);
+    return env->NewStringUTF(cipherTextHex.c_str());
 }
 
 extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt_decrypt(JNIEnv *env,  jobject,
@@ -119,6 +121,6 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt
         //LOGD("MSG is changed");
 
     }
-
-    return env->NewStringUTF(reinterpret_cast<const char *const>(decryptedMsg));
+    std::string decipherTextHex = toHexString(decryptedMsg, decryptedLen);
+    return env->NewStringUTF(decipherTextHex.c_str());
 }

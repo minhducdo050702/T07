@@ -17,12 +17,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Example of a call to a native method
-        binding.sampleText.text = stringFromJNI()
-        val service = MainService()
-        service.onCreate()
-        service.onStartCommand(null, 0, 0)
-        val register=Register()
-        register.registerApp("asda")
+//        binding.sampleText.text = stringFromJNI()
+//        val service = MainService()
+//        service.onCreate()
+//        service.onStartCommand(null, 0, 0)
+//        val register=Register()
+//        register.registerApp("asda")
 //        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
 //        val password = "password"
 //
@@ -40,12 +40,14 @@ class MainActivity : AppCompatActivity() {
 //        Log.d("MainActivity", "MAC Key: $MACKey")
         Log.d("Main Activity", "hello ");
         val crypto = EncryptDecrypt();
-        val key = "01234567890123456789012345678901";
-        val iv = "0123456789012345"
-        val plainText = "Hello World!!!!"
-
-        val cipherMsg = crypto.encrypt(key, iv, plainText)
-        val decryptedMsg = crypto.decrypt(key, iv, cipherMsg)
+        val key:String = "01234567890123456789012345678901";
+        val iv:String = "0123456789012345"
+        val plainText:String = "Hello World!!!!"
+        Log.d("Main Activity", "Plaintext : $plainText");
+        Log.d("Main Activity", "key : $key");
+        Log.d("Main Activity", "iv : $iv");
+        val cipherMsg:String = crypto.encrypt(key, iv, plainText);
+        val decryptedMsg:String = crypto.decrypt(key, iv, cipherMsg);
         Log.d("Main Activity", "Encrypted MSG: $cipherMsg");
         Log.d("Main Activity", "Decrypted MSG: $decryptedMsg");
     }

@@ -10,17 +10,26 @@
 #include <openssl/err.h>
 #include <string.h>
 
+std::string toHexString(const unsigned char* data, int len) {
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (int i = 0; i < len; ++i) {
+        ss << std::setw(2) << static_cast<unsigned>(data[i]);
+    }
+    return ss.str();
+}
+
 void handleErrors(void)
 {
-    unsigned long errCode;
-
-    printf("An error occurred\n");
-    while(errCode == ERR_get_error())
-    {
-        char *err = ERR_error_string(errCode, NULL);
-        printf("%s\n", err);
-    }
-    abort();
+//    unsigned long errCode;
+//
+//    printf("An error occurred\n");
+//    while(errCode == ERR_get_error())
+//    {
+//        char *err = ERR_error_string(errCode, NULL);
+//        printf("%s\n", err);
+//    }
+//    abort();
 }
 
 int encrypt_CBC(unsigned char *key, unsigned char *iv, unsigned char *plain, int plain_length, unsigned char *cipher) {

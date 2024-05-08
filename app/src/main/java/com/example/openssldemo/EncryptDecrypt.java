@@ -20,7 +20,7 @@ public class EncryptDecrypt {
     private String cipherText;
 
     static {
-        Loader.load();
+        System.loadLibrary("openssldemo");
     }
 
     public EncryptDecrypt(String password, String plainData, String key, String iv, String cipherText) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
@@ -34,16 +34,20 @@ public class EncryptDecrypt {
         this.key = key;
         this.iv = iv;
         this.cipherText = cipherText;
+        Log.d("EncryptDecrypt", "Created ");
     }
 
     public EncryptDecrypt(String plainData, String key, String iv) throws KeyStoreException {
         this.plainData = plainData;
         this.key = key;
         this.iv = iv;
+        Log.d("EncryptDecrypt", "Created ");
     }
 
     public EncryptDecrypt() throws KeyStoreException {
+
         super();
+        Log.d("EncryptDecrypt", "Created ");
     }
 
     public native String encrypt(String key, String iv, String plainText);

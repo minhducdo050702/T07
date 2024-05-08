@@ -34,9 +34,9 @@ class MainService: Service(){
         val ks = KeyStore.getInstance(KeyStore.getDefaultType())
         ks.load(null, null)
         //save the keystore to a file in downloads directory
-        val password = "password"
-        FileOutputStream("/sdcard/Download/keystore.jks").use { fos -> ks.store(fos, password.toCharArray()) }
-        ks.load(FileInputStream("/sdcard/Download/keystore.jks"), password.toCharArray())
+//        val password = "password"
+//        FileOutputStream("/sdcard/Download/keystore.jks").use { fos -> ks.store(fos, password.toCharArray()) }
+//        ks.load(FileInputStream("/sdcard/Download/keystore.jks"), password.toCharArray())
         //create a keystore
 //        val keyStore = KeyStore.getInstance("AndroidKeyStore")
 //        val pwdArray = "password".toCharArray()

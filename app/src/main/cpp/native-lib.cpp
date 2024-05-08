@@ -113,6 +113,8 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt
     const char *iv = env->GetStringUTFChars(jIv, nullptr);
     const char *cipherText = env->GetStringUTFChars(jCipherText, nullptr);
 
+
+
     int cipherLen = strlen(cipherText);
     int decryptedLen = decrypt_CBC((unsigned char *) key, (unsigned char *) iv,
                                    (unsigned char *) cipherText, cipherLen, decryptedMsg);

@@ -46,9 +46,10 @@ class MainActivity : AppCompatActivity() {
         Log.d("Main Activity", "Plaintext : $plainText");
         Log.d("Main Activity", "key : $key");
         Log.d("Main Activity", "iv : $iv");
-        val cipherMsg:String = crypto.encrypt(key, iv, plainText);
-        val decryptedMsg:String = crypto.decrypt(key, iv, cipherMsg);
-        Log.d("Main Activity", "Encrypted MSG: $cipherMsg");
+        val cipherHexMsg:String = crypto.encrypt(key, iv, plainText);
+
+        val decryptedMsg:String = crypto.decrypt(key, iv, cipherHexMsg);
+        Log.d("Main Activity", "Encrypted MSG: $cipherHexMsg");
         Log.d("Main Activity", "Decrypted MSG: $decryptedMsg");
     }
 

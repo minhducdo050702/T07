@@ -10,19 +10,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        // Example of a call to a native method
-//        binding.sampleText.text = stringFromJNI()
-//        val service = MainService()
-//        service.onCreate()
-//        service.onStartCommand(null, 0, 0)
-//        val register=Register()
-//        register.registerApp("asda")
+    private fun testGenKeyfunc(){
+        binding.sampleText.text = stringFromJNI()
+        val service = MainService()
+        service.onCreate()
+        service.onStartCommand(null, 0, 0)
+        val register=Register()
+        register.registerApp("asda")
 //        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
 //        val password = "password"
 //
@@ -38,11 +33,13 @@ class MainActivity : AppCompatActivity() {
 //        Log.d("MainActivity", "Master Key: $masterKey")
 //        Log.d("MainActivity", "AES Key: $AESKey")
 //        Log.d("MainActivity", "MAC Key: $MACKey")
+    }
+    private fun testCrypto(){
         Log.d("Main Activity", "hello ");
         val crypto = EncryptDecrypt();
         val key:String = "01234567890123456789012345678901";
         val iv:String = "0123456789012345"
-        val plainText:String = "Hello World!!!!"
+        val plainText:String = "Hello Baba World!!!!"
         Log.d("Main Activity", "Plaintext : $plainText");
         Log.d("Main Activity", "key : $key");
         Log.d("Main Activity", "iv : $iv");
@@ -52,6 +49,16 @@ class MainActivity : AppCompatActivity() {
         val decryptedMsg:String = crypto.decrypt(key, iv, cipherHexMsg);
         Log.d("Main Activity", "Encrypted MSG: $cipherHexMsg");
         Log.d("Main Activity", "Decrypted MSG: $decryptedMsg");
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        //test function
+        testCrypto();
     }
 
     /**

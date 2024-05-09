@@ -50,6 +50,6 @@ public class EncryptDecrypt {
         Log.d("EncryptDecrypt", "Created ");
     }
 
-    public native String encrypt(String key, String iv, String plainText);
-    public native String decrypt(String key, String iv, String cipherText);
+    public native byte[] encrypt(String key, String iv, String plainText);
+    public native String decrypt(String key, String iv, byte[] cipherText);
 }

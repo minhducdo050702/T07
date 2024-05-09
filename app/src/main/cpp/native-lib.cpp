@@ -86,43 +86,59 @@ Java_com_example_openssldemo_Register_genKey(JNIEnv *env, jobject) {
     return env->NewStringUTF(key.c_str());
 }
 
-extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt_encrypt(JNIEnv *env,  jobject,
+extern "C" JNIEXPORT jbyteArray JNICALL Java_com_example_openssldemo_EncryptDecrypt_encrypt(JNIEnv *env,  jobject,
                                                                                          jstring jKey,
                                                                                          jstring jIv,
                                                                                          jstring jPlainText){
-    unsigned char cipherText[1000] = "";
-
     const char *key = env->GetStringUTFChars(jKey, nullptr);
     const char *iv = env->GetStringUTFChars(jIv, nullptr);
     const char *plainText = env->GetStringUTFChars(jPlainText, nullptr);
 
+    unsigned char cipherText[1000] = "";
     int plainLen = strlen(plainText);
     int cipherLen = encrypt_CBC((unsigned char *) key, (unsigned char *) iv,
                                 (unsigned char *) plainText, plainLen, cipherText);
 
-    std::string cipherTextHex = toHexString(cipherText, cipherLen);
-    return env->NewStringUTF(cipherTextHex.c_str());
+    cipherText[cipherLen+1] = '\0';
+
+    // Create a byte array to hold the cipher
+    jbyteArray jCipher = env->NewByteArray(cipherLen);
+    // Copy the cipher data to the byte array
+    env->SetByteArrayRegion(jCipher, 0, cipherLen, (jbyte*)cipherText);
+
+    // Release the acquired resources
+    env->ReleaseStringUTFChars(jKey, key);
+    env->ReleaseStringUTFChars(jIv, iv);
+    env->ReleaseStringUTFChars(jPlainText, plainText);
+
+    return jCipher;
 }
 
 extern "C" JNIEXPORT jstring JNICALL Java_com_example_openssldemo_EncryptDecrypt_decrypt(JNIEnv *env,  jobject,
                                                                                          jstring jKey,
                                                                                          jstring jIv,
-                                                                                         jstring jCipherText) {
-    unsigned char decryptedMsg[1000] = "";
+                                                                                         jbyteArray jCipherText) {
+
     const char *key = env->GetStringUTFChars(jKey, nullptr);
     const char *iv = env->GetStringUTFChars(jIv, nullptr);
-    const char *cipherText = env->GetStringUTFChars(jCipherText, nullptr);
+    // Retrieve the byte array data
+//    jbyte *cipherByteData = env->GetByteArrayElements(jCipherText, nullptr);
+    jsize cipherLen = env->GetArrayLength(jCipherText);
 
+    unsigned char *cipherData = new unsigned char [cipherLen];
+    env->GetByteArrayRegion (jCipherText, 0, cipherLen, reinterpret_cast<jbyte*>(cipherData));
 
+    unsigned char decryptedMsg[1000];
 
-    int cipherLen = strlen(cipherText);
     int decryptedLen = decrypt_CBC((unsigned char *) key, (unsigned char *) iv,
-                                   (unsigned char *) cipherText, cipherLen, decryptedMsg);
+                                   (unsigned char *)cipherData, cipherLen, decryptedMsg);
+    decryptedMsg[decryptedLen] = '\0';
+    jstring jPlainText = env->NewStringUTF((const char *)decryptedMsg);
 
-    if (decryptedLen < 0) {
-        //LOGD("MSG is changed");
+    // Release the acquired resources
+    env->ReleaseStringUTFChars(jKey, key);
+    env->ReleaseStringUTFChars(jIv, iv);
+//    env->ReleaseByteArrayElements(jCipherText, , JNI_ABORT);
 
-    }
-    std::string decipherTextHex = toHexString(decryptedMsg, decryptedLen);
-    return env->NewStringUTF(decipherTextHex.c_str());
+    return jPlainText;
 }

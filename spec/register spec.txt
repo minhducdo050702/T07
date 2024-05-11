@@ -1,0 +1,16 @@
+	masterKeyLength = 32; // Master key length in bytes (256 bits)
+	aesKeyLength = 32;    // AES key length in bytes (256 bits)
+	macKeyLength = 32;    // MAC key length in bytes (256 bits)
+	saltLength = 32;      // Salt length in bytes
+	iterations = 1000;    // Iteration count
+
+	//gen masterKey and salt
+	RAND_bytes(masterKey, masterKeyLength)
+	RAND_bytes(aesSalt, saltLength)
+    RAND_bytes(macSalt, saltLength)
+
+    // Derive AES key
+	PKCS5_PBKDF2_HMAC(NULL, -1, aesSalt, saltLength, iterations, EVP_sha256(),aesKeyLength, aesKey)
+
+    // Derive MAC key
+    PKCS5_PBKDF2_HMAC(NULL, -1, macSalt, saltLength, iterations, EVP_sha256(),macKeyLength, macKey)

@@ -109,14 +109,14 @@ std::string genKey() {
     }
 
     // Derive AES key
-    if (PKCS5_PBKDF2_HMAC("password", 8, aesSalt, saltLength, iterations, EVP_sha256(),
+    if (PKCS5_PBKDF2_HMAC(NULL, -1, aesSalt, saltLength, iterations, EVP_sha256(),
                           aesKeyLength, aesKey) != 1) {
         std::cerr << "Error deriving AES key." << std::endl;
         return "";
     }
 
     // Derive MAC key
-    if (PKCS5_PBKDF2_HMAC("password", 8, macSalt, saltLength, iterations, EVP_sha256(),
+    if (PKCS5_PBKDF2_HMAC(NULL, -1, macSalt, saltLength, iterations, EVP_sha256(),
                           macKeyLength, macKey) != 1) {
         std::cerr << "Error deriving MAC key." << std::endl;
         return "";

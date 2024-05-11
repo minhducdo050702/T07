@@ -27,12 +27,12 @@ class MainService: Service(){
     private lateinit var dataDao: DataDao
     private val binder = object : IMyAidlInterface.Stub() {
         override fun register(packageID: String?) {
-           if(packageID != null) {
-               Log.d(TAG, "REGISTERING $packageID")
-               registerStoreData(packageID)
-           }else {
-               Log.d(TAG, "REGISTERING NULL")
-           }
+            if(packageID != null) {
+                Log.d(TAG, "REGISTERING $packageID")
+                registerStoreData(packageID)
+            }else {
+                Log.d(TAG, "REGISTERING NULL")
+            }
         }
 
         override fun test(x: Int): Int {

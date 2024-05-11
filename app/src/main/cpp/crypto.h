@@ -9,7 +9,10 @@
 #include <openssl/aes.h>
 #include <openssl/err.h>
 #include <string.h>
-
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+using namespace std;
 std::string toHexString(const unsigned char* data, int len) {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
@@ -19,68 +22,53 @@ std::string toHexString(const unsigned char* data, int len) {
     return ss.str();
 }
 
-void handleErrors(void)
-{
-//    unsigned long errCode;
-//
-//    printf("An error occurred\n");
-//    while(errCode == ERR_get_error())
-//    {
-//        char *err = ERR_error_string(errCode, NULL);
-//        printf("%s\n", err);
-//    }
-//    abort();
-}
-
 int encrypt_CBC(unsigned char *key, unsigned char *iv, unsigned char *plain, int plain_length, unsigned char *cipher) {
-    //key: 32byte 256bit
-    //iv: 16byte 128bit
-    int result = 0, encrypt = 1, outlen, len;
-    EVP_CIPHER_CTX *ctx = NULL;
-    //Init context
-    ctx = EVP_CIPHER_CTX_new();
-    if(!ctx) handleErrors();
-    //Init encryption process
-    if(!EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))handleErrors();
-    //Provider plain msg
-    if(!EVP_EncryptUpdate(ctx, cipher, &len, plain, plain_length)) handleErrors();
+    int result = 0, len, outlen;
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if(!ctx) return -1;
+
+    if(!EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) return -1;
+
+    if(!EVP_EncryptUpdate(ctx, cipher, &len, plain, plain_length)) return -1;
 
     outlen = len;
-    //Final encryption
-    if(!EVP_EncryptFinal_ex(ctx, cipher + len, &len)) handleErrors();
+
+    if(!EVP_EncryptFinal_ex(ctx, cipher + len, &len)) return -1;
 
     outlen += len;
 
-    //Clean up
     EVP_CIPHER_CTX_free(ctx);
     return outlen;
 }
 
 int decrypt_CBC(unsigned char *key, unsigned char *iv, unsigned char *cipher, int cipher_len, unsigned char *plain){
-    //key: 32byte 256bit
-    //iv: 16byte 128bit
-    int len = 0, plain_len = 0, ret;
+    int len = 0, plain_len = 0;
 
-    EVP_CIPHER_CTX *ctx = NULL;
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if(!ctx) return -1;
 
-    ctx = EVP_CIPHER_CTX_new();
-
-    if(!ctx) handleErrors();
-
-    if(!EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))handleErrors();
+    if(!EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) return -1;
 
     if(cipher){
-        if(!EVP_DecryptUpdate(ctx, plain, &len, cipher, cipher_len))
-            handleErrors();
+        if(!EVP_DecryptUpdate(ctx, plain, &len, cipher, cipher_len)) return -1;
         plain_len = len;
     }
 
-    if(!EVP_DecryptFinal(ctx, plain+len, &len)) handleErrors();
+    if(!EVP_DecryptFinal(ctx, plain+len, &len)) return -1;
     plain_len +=len;
 
     EVP_CIPHER_CTX_free(ctx);
 
     return plain_len;
+}
+string convert_hex_to_alphabet_string(string hex_string) {
+    string result = "";
+    for (int i = 0; i < hex_string.length(); i += 2) {
+        string byte = hex_string.substr(i, 2);
+        char chr = (char) (int)strtol(byte.c_str(), NULL, 16);
+        result.push_back(chr);
+    }
+    return result;
 }
 
 #endif //MY_APPLICATION2_CRYPTO_H

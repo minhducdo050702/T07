@@ -1,51 +1,96 @@
-package com.example.myapplication2
+package com.example.openssldemo
 
-import android.R.attr.password
 import android.app.Service
 import android.content.Intent
+import android.graphics.Color
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.example.openssldemo.database.data.AppDatabase
+import com.example.openssldemo.database.data.Data
+import com.example.openssldemo.database.data.DataDao
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.security.KeyStore
+import kotlin.random.Random
 
 
 class MainService: Service(){
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+    companion object {
+        const val TAG = "MainService"
+        const val PACKAGE_ID = "packageID"
+
     }
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-       Log.d("MainService", "Service started")
-        if (intent != null && intent.hasExtra("id")) {
-            // Retrieve the ID from the intent extras
-            val id = intent.getIntExtra("id", -1)
-
-            // Now you have the ID from the intent, you can use it as needed
-
-            // For example, log the ID
-            Log.d("MyService", "Received ID from intent: $id")
+    private lateinit var dataDao: DataDao
+    private val binder = object : IMyAidlInterface.Stub() {
+        override fun register(packageID: String?) {
+           if(packageID != null) {
+               Log.d(TAG, "REGISTERING $packageID")
+               registerStoreData(packageID)
+           }else {
+               Log.d(TAG, "REGISTERING NULL")
+           }
         }
 
-        return START_STICKY
+        override fun test(x: Int): Int {
+            return x * 2
+        }
+        override fun noti() : String {
+            return "HELLO"
+        }
+        override fun getColor() : Int {
+            val rd = Random(1)
+            val color = Color.argb(255, rd.nextInt(256), rd.nextInt(256), rd.nextInt(256))
+            Log.d(TAG, "getColor: $color");
+            return color
+        }
+
+        override fun store(packageID: String?, dataValue: String?, dataType: String?) {
+            Log.d(TAG, "STORE DATA WITH($packageID, $dataValue, $dataType)" )
+            if(dataType != null && packageID != null && dataValue != null) {
+                val listData = dataDao.getByType(dataType ,packageID )
+                Log.d(TAG, "DATA SIZE: ${listData.size}")
+                if(listData.isEmpty()) {
+                    dataDao.insert(packageID, dataType, dataValue )
+                }else {
+                    Log.d(TAG, "EXIST DATA")
+                }
+
+            }else {
+                Log.d(TAG, "REQUIRE DATA")
+            }
+        }
+
+        override fun load(packageID: String?, dataType: String?): String {
+            if(packageID != null && dataType != null) {
+                val data = dataDao.getByType(dataType,packageID)
+                Log.d(TAG, "LOAD DATA SIZE ${data.size}")
+                if(data.isNotEmpty()) {
+                    return data[0].dataValue
+                }
+                return null.toString()
+
+            }else {
+                return null.toString()
+            }
+        }
     }
-    override fun onCreate() {
-        Log.d("MainService", "Service created")
-        val ks = KeyStore.getInstance(KeyStore.getDefaultType())
-        ks.load(null, null)
-        //save the keystore to a file in downloads directory
-//        val password = "password"
-//        FileOutputStream("/sdcard/Download/keystore.jks").use { fos -> ks.store(fos, password.toCharArray()) }
-//        ks.load(FileInputStream("/sdcard/Download/keystore.jks"), password.toCharArray())
-        //create a keystore
-//        val keyStore = KeyStore.getInstance("AndroidKeyStore")
-//        val pwdArray = "password".toCharArray()
-//        keyStore.load(null)
-//        FileOutputStream("newKeyStoreFileName2.jks").use { fos -> keyStore.store(fos, pwdArray) }
-        super.onCreate()
-        // Do something
+
+    override fun onBind(intent: Intent?): IBinder {
+        dataDao = AppDatabase.getDatabase(applicationContext).dataDao()
+        intent?.getStringExtra(PACKAGE_ID).let {
+            Log.d(TAG, "BINDING TO ${it.toString()}")
+        }
+        return binder
     }
 
 
+    private fun registerStoreData(packageID : String) {
+        val keyManager = Register()
+        keyManager.registerApp(packageID)
+    }
 
 }

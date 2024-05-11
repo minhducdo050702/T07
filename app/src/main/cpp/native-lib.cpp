@@ -78,6 +78,7 @@ string convert_hex_to_alphabet_string(string hex_string) {
     return result;
 }
 
+
 std::string genKey() {
     const int masterKeyLength = 32; // Master key length in bytes (256 bits)
     const int aesKeyLength = 32;    // AES key length in bytes (256 bits)
@@ -133,6 +134,162 @@ std::string genKey() {
     }
     return binary_key;
 }
+void handleErrors(void)
+{
+    ERR_print_errors_fp(stderr);
+    abort();
+}
+
+
+int hmac_it(const unsigned char *msg, size_t mlen, unsigned char **val, size_t *vlen, EVP_PKEY *pkey)
+{
+    /* Returned to caller */
+    int result = 0;
+    EVP_MD_CTX* ctx = NULL;
+    size_t req = 0;
+    int rc;
+
+    if(!msg || !mlen || !val || !pkey)
+        return 0;
+
+    *val = NULL;
+    *vlen = 0;
+
+    ctx = EVP_MD_CTX_new();
+    if (ctx == NULL) {
+        printf("EVP_MD_CTX_create failed, error 0x%lx\n", ERR_get_error());
+        goto err;
+    }
+
+    rc = EVP_DigestSignInit(ctx, NULL, EVP_sha256(), NULL, pkey);
+    if (rc != 1) {
+        printf("EVP_DigestSignInit failed, error 0x%lx\n", ERR_get_error());
+        goto err;
+    }
+
+    rc = EVP_DigestSignUpdate(ctx, msg, mlen);
+    if (rc != 1) {
+        printf("EVP_DigestSignUpdate failed, error 0x%lx\n", ERR_get_error());
+        goto err;
+    }
+
+    rc = EVP_DigestSignFinal(ctx, NULL, &req);
+    if (rc != 1) {
+        printf("EVP_DigestSignFinal failed (1), error 0x%lx\n", ERR_get_error());
+        goto err;
+    }
+
+    *val = (unsigned char*)OPENSSL_malloc(req);
+    if (*val == NULL) {
+        printf("OPENSSL_malloc failed, error 0x%lx\n", ERR_get_error());
+        goto err;
+    }
+
+    *vlen = req;
+    rc = EVP_DigestSignFinal(ctx, *val, vlen);
+    if (rc != 1) {
+        printf("EVP_DigestSignFinal failed (3), return code %d, error 0x%lx\n", rc, ERR_get_error());
+        goto err;
+    }
+
+    result = 1;
+
+
+    err:
+    EVP_MD_CTX_free(ctx);
+    if (!result) {
+        OPENSSL_free(*val);
+        *val = NULL;
+    }
+    return result;
+}
+
+int verify_it(const unsigned char *msg, size_t mlen, const unsigned char *val, size_t vlen, EVP_PKEY *pkey)
+{
+    /* Returned to caller */
+    int result = 0;
+    EVP_MD_CTX* ctx = NULL;
+    unsigned char buff[EVP_MAX_MD_SIZE];
+    size_t size;
+    int rc;
+
+    if(!msg || !mlen || !val || !vlen || !pkey)
+        return 0;
+
+    ctx = EVP_MD_CTX_new();
+    if (ctx == NULL) {
+        printf("EVP_MD_CTX_create failed, error 0x%lx\n", ERR_get_error());
+        goto err;
+    }
+
+    rc = EVP_DigestSignInit(ctx, NULL, EVP_sha256(), NULL, pkey);
+    if (rc != 1) {
+        printf("EVP_DigestSignInit failed, error 0x%lx\n", ERR_get_error());
+        goto err;
+    }
+
+    rc = EVP_DigestSignUpdate(ctx, msg, mlen);
+    if (rc != 1) {
+        printf("EVP_DigestSignUpdate failed, error 0x%lx\n", ERR_get_error());
+        goto err;
+    }
+
+    size = sizeof(buff);
+    rc = EVP_DigestSignFinal(ctx, buff, &size);
+    if (rc != 1) {
+        printf("EVP_DigestSignFinal failed, error 0x%lx\n", ERR_get_error());
+        goto err;
+    }
+
+    result = (vlen == size) && (CRYPTO_memcmp(val, buff, size) == 0);
+    err:
+    EVP_MD_CTX_free(ctx);
+    return result;
+}
+
+string genHMAC(string data, string key) {
+    const unsigned char *msg = (const unsigned char *)data.c_str();
+    const unsigned char *key_ = (const unsigned char *)key.c_str();
+    unsigned char *val = NULL;
+    size_t vlen = 0;
+    EVP_PKEY *pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL, key_, key.length());
+    if (!pkey) {
+        printf("EVP_PKEY_new_mac_key failed, error 0x%lx\n", ERR_get_error());
+        return "";
+    }
+    if (!hmac_it(msg, data.length(), &val, &vlen, pkey)) {
+        printf("hmac_it failed\n");
+        return "";
+    }
+    EVP_PKEY_free(pkey);
+    string result = toHexString(val, vlen);
+    OPENSSL_free(val);
+    return result;
+}
+
+
+int checkHMAC(string data, string key, string hmac) {
+    const unsigned char *msg = (const unsigned char *)data.c_str();
+    const unsigned char *key_ = (const unsigned char *)key.c_str();
+    //convert hmac back to unsigned char*
+    unsigned char *hmac_ = (unsigned char *)malloc(hmac.length() / 2);
+    for (int i = 0; i < hmac.length(); i += 2) {
+        string byte = hmac.substr(i, 2);
+        hmac_[i / 2] = (unsigned char) (int)strtol(byte.c_str(), NULL, 16);
+    }
+    EVP_PKEY *pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL, key_, key.length());
+    if (!pkey) {
+        printf("EVP_PKEY_new_mac_key failed, error 0x%lx\n", ERR_get_error());
+        return 0;
+    }
+    int result = verify_it(msg, data.length(), hmac_, hmac.length() / 2, pkey);
+    EVP_PKEY_free(pkey);
+    return result;
+
+}
+
+
+
 
 extern "C"
 JNIEXPORT jstring JNICALL
@@ -205,4 +362,29 @@ Java_com_example_openssldemo_EncryptDecrypt_decrypt(JNIEnv *env, jobject thiz, j
     decrypted[decrypted_len] = '\0'; // Ensure null-termination
 
     return env->NewStringUTF(reinterpret_cast<char*>(decrypted.data()));
+}
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_example_openssldemo_HMac_genHmac(JNIEnv *env, jobject thiz, jstring data, jstring key) {
+    const char *data_ = env->GetStringUTFChars(data, nullptr);
+    const char *key_ = env->GetStringUTFChars(key, nullptr);
+    string hmac = genHMAC(data_, key_);
+    env->ReleaseStringUTFChars(data, data_);
+    env->ReleaseStringUTFChars(key, key_);
+    return env->NewStringUTF(hmac.c_str());
+}
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_openssldemo_HMac_verifyHmac(JNIEnv *env, jobject thiz, jstring data, jstring key,
+                                             jstring hmac) {
+    // TODO: implement verifyHmac()
+    const char *data_ = env->GetStringUTFChars(data, nullptr);
+    const char *key_ = env->GetStringUTFChars(key, nullptr);
+    const char *hmac_ = env->GetStringUTFChars(hmac, nullptr);
+    int result = checkHMAC(data_, key_, hmac_);
+    env->ReleaseStringUTFChars(data, data_);
+    env->ReleaseStringUTFChars(key, key_);
+    env->ReleaseStringUTFChars(hmac, hmac_);
+    return result;
+
 }

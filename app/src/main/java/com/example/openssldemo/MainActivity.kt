@@ -16,6 +16,22 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.sampleText.text = "Data Secure Vault"
+//        val register= Register()
+//        register.registerApp("asda")
+//        val encryptDecrypt = EncryptDecrypt("asda","2390172847198247190")
+//        val ciphertext=encryptDecrypt.encrypt("Hello world !!!")
+//        encryptDecrypt.decrypt(ciphertext)
+//        val hMac = HMac("asda")
+//        val mac = hMac.genHmac("Hello world !!!")
+//        val verify = hMac.verifyHmac("Hello world !!!",mac)
+//        Log.d("HMAC",verify.toString())
+//
+//
+
+
+
+
+
 
     }
 

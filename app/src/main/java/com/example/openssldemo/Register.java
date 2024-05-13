@@ -1,6 +1,7 @@
 package com.example.openssldemo;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
@@ -25,8 +26,8 @@ public class Register {
         System.loadLibrary("openssldemo");
     }
     KeystoreController keystoreController;
-    public Register() throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
-        keystoreController=new KeystoreController();
+    public Register(Context context) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
+        keystoreController = new KeystoreController(context);
     }
     public String convert_binary_string_to_hex_string(String binary_string) {
         StringBuilder hex_string = new StringBuilder();
@@ -50,9 +51,9 @@ public class Register {
         keystoreController.setAESKey(alias,AESKeyHex);
         keystoreController.setMACKey(alias,MACKeyHex);
         Log.d("Register","App registered successfully");
-        String masterKey1=keystoreController.getMasterKey(alias);
-        String AESKey1=keystoreController.getAESKey(alias);
-        String MACKey1=keystoreController.getMACKey(alias);
+        String masterKey1= keystoreController.getMasterKey(alias);
+        String AESKey1= keystoreController.getAESKey(alias);
+        String MACKey1= keystoreController.getMACKey(alias);
 
         Log.d("Register","Master Key: "+masterKey1);
         Log.d("Register","AES Key: "+AESKey1);

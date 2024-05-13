@@ -1,6 +1,13 @@
 package com.example.openssldemo;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
+
+import androidx.core.content.ContextCompat;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,21 +18,36 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 public class KeystoreController {
     KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+    String path ;
+   // String path = "/sdcard/Download/keystore.jks";
     String password = "password";
     static {
         System.loadLibrary("openssldemo");
     }
-    public KeystoreController() throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
+    //@SuppressLint("SdCardPath")
+    public KeystoreController(Context context) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            path =  ContextCompat.getExternalFilesDirs(context, null)[0].getAbsolutePath() + "/keystore.jks";
             //load key store from file in downloads directory
-            keyStore.load(new FileInputStream("/sdcard/Download/keystore.jks"), password.toCharArray());
-            Log.d("Register","Keystore loaded successfully");
-        }
+            //keyStore.load(new FileInputStream("/sdcard/Download/keystore.jks"), password.toCharArray());
+            Log.d("AA", path);
+            File f = new File(path);
+            if(f.exists()) {
+                keyStore.load(Files.newInputStream(Paths.get(path)), password.toCharArray());
+                Log.d("Register","Keystore loaded successfully");
+            }else {
+                Log.d("Register","Keystore not found");
+                keyStore.load(null, null);
+            }
+
+       }
 
 
     }
@@ -44,6 +66,7 @@ public class KeystoreController {
         SecretKey MACKey = (SecretKey) keyStore.getKey(alias3, "".toCharArray());
         return new String(MACKey.getEncoded());
     }
+
     public void setMasterKey(String alias, String key) throws KeyStoreException {
         String alias1=alias+" MasterKey";
         SecretKey masterSecretKey = new SecretKeySpec
@@ -54,7 +77,7 @@ public class KeystoreController {
         //save key store to file in downloads directory
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                keyStore.store(Files.newOutputStream(Paths.get("/sdcard/Download/keystore.jks")), password.toCharArray());
+                keyStore.store(Files.newOutputStream(Paths.get(path)), password.toCharArray());
             }
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
@@ -69,7 +92,7 @@ public class KeystoreController {
         keyStore.setEntry(alias2, AESSecretEntry, null);
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                keyStore.store(Files.newOutputStream(Paths.get("/sdcard/Download/keystore.jks")), password.toCharArray());
+                keyStore.store(Files.newOutputStream(Paths.get(path)), password.toCharArray());
             }
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
@@ -85,11 +108,22 @@ public class KeystoreController {
         keyStore.setEntry(alias3, MACSecretEntry, null);
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                keyStore.store(Files.newOutputStream(Paths.get("/sdcard/Download/keystore.jks")), password.toCharArray());
+                keyStore.store(Files.newOutputStream(Paths.get(path)), password.toCharArray());
             }
         } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public boolean isRegistered(String alias) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
+        String alias1 = alias+" MasterKey";
+        String alias2 = alias + " AESKey";
+        String alias3 = alias + " MACKey";
+        SecretKey masterKey = (SecretKey) keyStore.getKey(alias1, "".toCharArray());
+        SecretKey AESKey = (SecretKey) keyStore.getKey(alias2, "".toCharArray());
+        SecretKey MacKey = (SecretKey) keyStore.getKey(alias3, "".toCharArray());
+        return masterKey != null && AESKey != null && MacKey != null;
     }
 
 }

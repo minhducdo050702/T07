@@ -9,15 +9,10 @@ interface IMyAidlInterface {
      * and return values in AIDL.
      */
 
-    void register(String packageID);
-    void store(String packageID, String dataValue, String dataType);
+    String register(String packageID);
+    String store(String packageID, String dataValue, String dataType);
     String load(String packageID, String dataType );
     // these function is for testing connection
-    int test(int x);
-    String noti();
-    int getColor();
-
-
 
 
 }

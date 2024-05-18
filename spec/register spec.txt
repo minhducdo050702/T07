@@ -1,16 +1,60 @@
-	masterKeyLength = 32; // Master key length in bytes (256 bits)
-	aesKeyLength = 32;    // AES key length in bytes (256 bits)
-	macKeyLength = 32;    // MAC key length in bytes (256 bits)
-	saltLength = 32;      // Salt length in bytes
-	iterations = 1000;    // Iteration count
+Functions
+std::string genMasterKey()
+This function generates a random master key and returns it as a binary string.
 
-	//gen masterKey and salt
-	RAND_bytes(masterKey, masterKeyLength)
-	RAND_bytes(aesSalt, saltLength)
-    RAND_bytes(macSalt, saltLength)
+Variables:
 
-    // Derive AES key
-	PKCS5_PBKDF2_HMAC(NULL, -1, aesSalt, saltLength, iterations, EVP_sha256(),aesKeyLength, aesKey)
+unsigned char masterKey[masterKeyLength]: An array to hold the master key bytes.
+std::string binary_master_key: A string to hold the binary representation of the master key.
+Steps:
 
-    // Derive MAC key
-    PKCS5_PBKDF2_HMAC(NULL, -1, macSalt, saltLength, iterations, EVP_sha256(),macKeyLength, macKey)
+Generates a random master key of masterKeyLength bytes using RAND_bytes.
+Converts the master key bytes to a binary string using std::bitset<8> and appends it to binary_master_key.
+Returns the binary string representation of the master key.
+std::string genKey(std::string masterkey_)
+This function takes a master key in binary string format, derives an AES key and a MAC key using the scrypt key derivation function, and returns a concatenated binary string of all keys.
+
+Parameters:
+
+std::string masterkey_: A binary string representation of the master key.
+Variables:
+
+unsigned char masterKey[masterKeyLength]: An array to hold the master key bytes.
+unsigned char aesKey[aesKeyLength]: An array to hold the derived AES key.
+unsigned char macKey[macKeyLength]: An array to hold the derived MAC key.
+unsigned char aesSalt[saltLength]: An array to hold the salt for the AES key derivation.
+unsigned char macSalt[saltLength]: An array to hold the salt for the MAC key derivation.
+std::string key: A string to hold the concatenated keys (master key, AES key, MAC key).
+std::string binary_key: A string to hold the binary representation of the concatenated keys.
+Steps:
+
+Converts the binary string masterkey_ into bytes and stores them in masterKey.
+Generates random salts for the AES and MAC keys using RAND_bytes.
+Derives the AES key using EVP_PBE_scrypt with the master key and aesSalt.
+Derives the MAC key using EVP_PBE_scrypt with the master key and macSalt.
+Concatenates the master key, AES key, and MAC key into the key string.
+Converts the concatenated key string into a binary string using std::bitset<8> and appends it to binary_key.
+Returns the binary string representation of the concatenated keys.
+Constants
+const int masterKeyLength = 32;: Defines the length of the master key in bytes (256 bits).
+const int aesKeyLength = 32;: Defines the length of the AES key in bytes (256 bits).
+const int macKeyLength = 32;: Defines the length of the MAC key in bytes (256 bits).
+const int saltLength = 32;: Defines the length of the salt in bytes.
+const int n = 16384;: Scrypt CPU/memory cost parameter.
+const int r = 8;: Scrypt block size parameter.
+const int p = 1;: Scrypt parallelization parameter.
+Key Functions and Libraries
+RAND_bytes: Generates cryptographically strong pseudo-random bytes.
+EVP_PBE_scrypt: Derives a key using the scrypt key derivation function.
+std::bitset<8>: Converts a byte into its binary representation as a string.
+Key Generation Flow
+Master Key Generation (genMasterKey):
+
+Generates a random master key and converts it to a binary string.
+Key Derivation (genKey):
+
+Converts the provided master key binary string to bytes.
+Generates random salts for AES and MAC key derivation.
+Derives the AES key and MAC key using the scrypt key derivation function.
+Concatenates the master key, AES key, and MAC key.
+Converts the concatenated keys to a binary string and returns it.

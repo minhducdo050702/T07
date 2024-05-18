@@ -39,7 +39,7 @@ public class Register {
         return hex_string.toString();
     }
     public void registerApp(String alias) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-        String key=this.genKey();
+        String key=this.genKey(keystoreController.getMasterKey());
         //divide the key into 3 parts 256 bits
         String masterKey=key.substring(0,256);
         String AESKey=key.substring(256,512);
@@ -47,19 +47,22 @@ public class Register {
         String masterKeyHex=convert_binary_string_to_hex_string(masterKey);
         String AESKeyHex=convert_binary_string_to_hex_string(AESKey);
         String MACKeyHex=convert_binary_string_to_hex_string(MACKey);
-        keystoreController.setMasterKey(alias,masterKeyHex);
         keystoreController.setAESKey(alias,AESKeyHex);
         keystoreController.setMACKey(alias,MACKeyHex);
         Log.d("Register","App registered successfully");
-        String masterKey1= keystoreController.getMasterKey(alias);
         String AESKey1= keystoreController.getAESKey(alias);
         String MACKey1= keystoreController.getMACKey(alias);
-
-        Log.d("Register","Master Key: "+masterKey1);
         Log.d("Register","AES Key: "+AESKey1);
         Log.d("Register","MAC Key: "+MACKey1);
 
     }
-    private native String genKey();
+    //ham nay chi duoc goi 1 lan luc cai dat service
+    public String genMasterKeyOnce() throws KeyStoreException {
+        String masterKey = genMasterKey();
+        keystoreController.setMasterKey(masterKey);
+        return masterKey;
+    }
+    private native String genKey(String masterKey_);
+    private native String genMasterKey();
 
 }

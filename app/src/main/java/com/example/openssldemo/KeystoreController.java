@@ -51,9 +51,9 @@ public class KeystoreController {
 
 
     }
-    public String getMasterKey(String alias) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-        String alias1=alias+" MasterKey";
-        SecretKey masterKey = (SecretKey) keyStore.getKey(alias1, "".toCharArray());
+    public String getMasterKey() throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
+        String alias=" MasterKey";
+        SecretKey masterKey = (SecretKey) keyStore.getKey(alias, "".toCharArray());
         return new String(masterKey.getEncoded());
     }
     public String getAESKey(String alias) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
@@ -67,13 +67,13 @@ public class KeystoreController {
         return new String(MACKey.getEncoded());
     }
 
-    public void setMasterKey(String alias, String key) throws KeyStoreException {
-        String alias1=alias+" MasterKey";
+    public void setMasterKey(String key) throws KeyStoreException {
+        String alias=" MasterKey";
         SecretKey masterSecretKey = new SecretKeySpec
                 (key.getBytes(), "AES");
         KeyStore.SecretKeyEntry masterSecretEntry=
                 new KeyStore.SecretKeyEntry(masterSecretKey);
-        keyStore.setEntry(alias1, masterSecretEntry, null);
+        keyStore.setEntry(alias, masterSecretEntry, null);
         //save key store to file in downloads directory
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

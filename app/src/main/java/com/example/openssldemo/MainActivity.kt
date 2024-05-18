@@ -16,6 +16,11 @@ import java.io.FileInputStream
 import java.security.KeyStore
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
+import com.example.openssldemo.EncryptDecrypt
+import com.example.openssldemo.HMac
+import com.example.openssldemo.Register
+import com.example.openssldemo.KeystoreController
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +42,8 @@ class MainActivity : AppCompatActivity() {
         for(i in dir2.indices) {
             Log.d("A", dir2[i])
         }
+
+
 
 //        val keyFile = File(dir[0].absolutePath + "/abz.jks")
 //        if(!keyFile.exists()) {

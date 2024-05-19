@@ -41,19 +41,12 @@ public class Register {
     public void registerApp(String alias) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
         String key=this.genKey(keystoreController.getMasterKey());
         //divide the key into 3 parts 256 bits
-        String masterKey=key.substring(0,256);
-        String AESKey=key.substring(256,512);
-        String MACKey=key.substring(512,768);
-        String masterKeyHex=convert_binary_string_to_hex_string(masterKey);
+        String AESKey=key;
         String AESKeyHex=convert_binary_string_to_hex_string(AESKey);
-        String MACKeyHex=convert_binary_string_to_hex_string(MACKey);
         keystoreController.setAESKey(alias,AESKeyHex);
-        keystoreController.setMACKey(alias,MACKeyHex);
         Log.d("Register","App registered successfully");
         String AESKey1= keystoreController.getAESKey(alias);
-        String MACKey1= keystoreController.getMACKey(alias);
         Log.d("Register","AES Key: "+AESKey1);
-        Log.d("Register","MAC Key: "+MACKey1);
 
     }
     //ham nay chi duoc goi 1 lan luc cai dat service

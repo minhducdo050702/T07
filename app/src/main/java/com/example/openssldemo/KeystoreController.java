@@ -96,7 +96,6 @@ public class KeystoreController {
     }
 
 
-
     public boolean isRegistered(String alias) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
         String alias1 = alias+" MasterKey";
         String alias2 = alias + " AESKey";

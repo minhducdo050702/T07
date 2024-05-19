@@ -39,9 +39,7 @@ public class Register {
         return hex_string.toString();
     }
     public void registerApp(String alias) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-        String key=this.genKey(keystoreController.getMasterKey());
-        //divide the key into 3 parts 256 bits
-        String AESKey=key;
+        String AESKey=this.genKey(keystoreController.getMasterKey());
         String AESKeyHex=convert_binary_string_to_hex_string(AESKey);
         keystoreController.setAESKey(alias,AESKeyHex);
         Log.d("Register","App registered successfully");

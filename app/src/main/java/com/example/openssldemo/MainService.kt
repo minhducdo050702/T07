@@ -3,12 +3,14 @@ package com.example.openssldemo
 import android.app.Service
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.YuvImage
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.openssldemo.MainService.Companion.PACKAGE_ID
+import com.example.openssldemo.database.data.AppDao
 import com.example.openssldemo.database.data.AppDatabase
 import com.example.openssldemo.database.data.Data
 import com.example.openssldemo.database.data.DataDao
@@ -27,11 +29,13 @@ class MainService : Service() {
 
 
     private lateinit var dataDao: DataDao
+    private lateinit var appDao: AppDao
     private val binder = object : IMyAidlInterface.Stub() {
-        override fun register(packageID: String?): String {
+        override fun register(packageID: String?, image: String): String {
             if (packageID != null) {
                 val keystoreController = KeystoreController(applicationContext)
                 val isRegistered = keystoreController.isRegistered(packageID)
+                //appDao.insert(packageID, packageID, image)
                 Log.d(TAG, "REGISTER $packageID, $isRegistered")
                 if (isRegistered) {
                     return "You have already registered."
@@ -65,7 +69,7 @@ class MainService : Service() {
                     val listData = dataDao.getByType(dataType, packageID)
                     Log.d(TAG, "DATA SIZE: ${listData.size}")
                     if (listData.isEmpty()) {
-                         dataDao.insert(packageID, dataType, encryptedData, hmac_data)
+                         //dataDao.insert(packageID, dataType, encryptedData, hmac_data)
                         return "You have stored data successful"
                     } else {
                         Log.d(TAG, "EXIST DATA")
@@ -124,9 +128,11 @@ class MainService : Service() {
 
     override fun onBind(intent: Intent?): IBinder {
         dataDao = AppDatabase.getDatabase(applicationContext).dataDao()
+        appDao = AppDatabase.getDatabase(applicationContext).appDao()
         intent?.getStringExtra(PACKAGE_ID).let {
             Log.d(TAG, "BINDING TO ${it.toString()}")
         }
+
         return binder
     }
 

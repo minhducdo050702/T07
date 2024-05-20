@@ -1,32 +1,24 @@
 package com.example.openssldemo
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.openssldemo.database.data.AppDatabase
 import com.example.openssldemo.databinding.ActivityMainBinding
-import java.io.File
-import java.io.FileInputStream
-import java.security.KeyStore
-import javax.crypto.SecretKey
-import javax.crypto.spec.SecretKeySpec
-import com.example.openssldemo.EncryptDecrypt
-import com.example.openssldemo.HMac
-import com.example.openssldemo.Register
-import com.example.openssldemo.KeystoreController
+import com.example.openssldemo.viewmodel.AppViewModel
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val viewModel : AppViewModel by viewModels {
 
-    @SuppressLint("SetTextI18n")
+        AppViewModel.AppViewModelFactory(AppDatabase.getDatabase(this).dataDao(),
+            AppDatabase.getDatabase(this).appDao())
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -42,6 +34,10 @@ class MainActivity : AppCompatActivity() {
         for(i in dir2.indices) {
             Log.d("A", dir2[i])
         }
+
+        viewModel.createNew("3", "password", "test value")
+
+
 
 
 

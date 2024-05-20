@@ -12,15 +12,15 @@ interface DataDao {
     fun getByType(dataType: String, appId: String): List<Data>
 
     @Query("INSERT INTO data (app_id, data_type, data_value, mac) VALUES (:appId, :dataType, :dataValue, :mac)")
-    fun insert(appId: String, dataType: String, dataValue: String, mac: String)
+    suspend fun insert(appId: String, dataType: String, dataValue: String, mac: String)
 
     @Query("DELETE FROM data WHERE app_id = :appId")
-    fun deleteAll(appId: String)
+    suspend fun deleteAll(appId: String)
 
     @Query("DELETE FROM data WHERE app_id = :appId AND data_type = :dataType")
-    fun deleteByType(appId: String, dataType: String)
+    suspend fun deleteByType(appId: String, dataType: String)
 
     @Query("UPDATE data SET data_value = :dataValue AND mac = :mac WHERE app_id = :appId AND data_type = :dataType")
-    fun update(appId: String, dataType: String, dataValue: String, mac: String)
+    suspend fun update(appId: String, dataType: String, dataValue: String, mac: String)
 
 }

@@ -95,16 +95,10 @@ std::string genKey(string masterkey_) {
     }
 
     unsigned char aesKey[aesKeyLength];
-    unsigned char macKey[macKeyLength];
     unsigned char aesSalt[saltLength]; // Salt for AES key
-    unsigned char macSalt[saltLength]; // Salt for MAC key
     // Generate random salts for AES key and MAC key
     if (RAND_bytes(aesSalt, saltLength) != 1) {
         std::cerr << "Error generating random bytes for AES salt." << std::endl;
-        return "";
-    }
-    if (RAND_bytes(macSalt, saltLength) != 1) {
-        std::cerr << "Error generating random bytes for MAC salt." << std::endl;
         return "";
     }
 
@@ -115,17 +109,8 @@ std::string genKey(string masterkey_) {
         return "";
     }
 
-    // Derive MAC key using scrypt
-    if (EVP_PBE_scrypt(reinterpret_cast<const char*>(masterKey), masterKeyLength,
-                       macSalt, saltLength, n, r, p, 0, macKey, macKeyLength) != 1) {
-        std::cerr << "Error deriving MAC key using scrypt." << std::endl;
-        return "";
-    }
 
-    // Concatenate master key, AES key, and MAC key
-    std::string key(reinterpret_cast<char*>(masterKey), masterKeyLength);
-    key.append(reinterpret_cast<char*>(aesKey), aesKeyLength);
-    key.append(reinterpret_cast<char*>(macKey), macKeyLength);
+    std::string key(reinterpret_cast<char*>(aesKey), aesKeyLength);
 
     // Convert key to binary string
     std::string binary_key;

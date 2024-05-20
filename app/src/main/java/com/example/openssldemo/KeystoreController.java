@@ -61,11 +61,7 @@ public class KeystoreController {
         SecretKey AESKey = (SecretKey) keyStore.getKey(alias2, "".toCharArray());
         return new String(AESKey.getEncoded());
     }
-    public String getMACKey(String alias) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-        String alias3=alias+" MACKey";
-        SecretKey MACKey = (SecretKey) keyStore.getKey(alias3, "".toCharArray());
-        return new String(MACKey.getEncoded());
-    }
+
 
     public void setMasterKey(String key) throws KeyStoreException {
         String alias=" MasterKey";
@@ -90,22 +86,6 @@ public class KeystoreController {
         KeyStore.SecretKeyEntry AESSecretEntry=
                 new KeyStore.SecretKeyEntry(AESSecretKey);
         keyStore.setEntry(alias2, AESSecretEntry, null);
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                keyStore.store(Files.newOutputStream(Paths.get(path)), password.toCharArray());
-            }
-        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setMACKey(String alias, String key) throws KeyStoreException {
-        String alias3=alias+" MACKey";
-        SecretKey MACSecretKey = new SecretKeySpec
-                (key.getBytes(), "AES");
-        KeyStore.SecretKeyEntry MACSecretEntry=
-                new KeyStore.SecretKeyEntry(MACSecretKey);
-        keyStore.setEntry(alias3, MACSecretEntry, null);
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 keyStore.store(Files.newOutputStream(Paths.get(path)), password.toCharArray());

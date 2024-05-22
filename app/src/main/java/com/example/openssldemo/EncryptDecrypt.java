@@ -36,13 +36,13 @@ public class EncryptDecrypt {
     }
     public String encrypt(String plainData) {
         //this.iv = iv; ??
-        String cipherText = encrypt(this.AESkey, this.iv, plainData);
+        String cipherText = encryptGCM(this.AESkey, this.iv, plainData);
         Log.d("EncryptDecrypt", "Encrypted "+cipherText);
         return cipherText;
     }
     public String decrypt(String cipherText) {
         //this.iv = iv; ??
-        String plainData = decrypt(this.AESkey, this.iv, cipherText);
+        String plainData = decryptGCM(this.AESkey, this.iv, cipherText);
         Log.d("EncryptDecrypt", "Decrypted "+plainData);
         return plainData;
     }
@@ -50,4 +50,7 @@ public class EncryptDecrypt {
 
     public native String encrypt(String key, String iv, String plainData);
     public native String decrypt(String key, String iv, String cipherText);
+
+    public native String encryptGCM(String key, String iv, String plainData);
+    public native String decryptGCM(String key, String iv, String cipherText);
 }

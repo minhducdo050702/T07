@@ -6,16 +6,13 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
+import java.util.Date
 
 
 @Entity(tableName = "log", foreignKeys = [
-    ForeignKey(
-        entity = Data::class,
-        parentColumns = arrayOf("id"),
-        childColumns = arrayOf("data_id"),
-        onDelete = ForeignKey.CASCADE,
-        onUpdate = ForeignKey.CASCADE
-    ),
+
     ForeignKey(
         entity = App::class,
         parentColumns = arrayOf("id"),
@@ -26,10 +23,23 @@ import androidx.room.PrimaryKey
 ])
 
 data class Log(
-    @PrimaryKey @ColumnInfo(name = "log_id") val logID: Int,
-    @ColumnInfo(name = "log_date") val logDate: String,
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "log_id") val logID: Int,
+    @ColumnInfo(name = "app_id", index = true)val appId : String,
     val action: String,
-    @ColumnInfo(name = "data_id")val dataId : Int,
-    @ColumnInfo(name = "app_id")val appId : Int
+    @ColumnInfo(name = "log_date") val logDate: Date,
+    val status: String
 ) {
+}
+
+
+class Converters {
+    @TypeConverter
+    fun fromTimestamp(value: Long) : Date {
+        return Date(value)
+    }
+
+    @TypeConverter
+    fun dateToTimestamp(date: Date) : Long {
+        return date.time
+    }
 }

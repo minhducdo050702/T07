@@ -43,7 +43,7 @@ public class EncryptDecrypt {
     public String decrypt(String cipherText) {
         //this.iv = iv; ??
         String plainData = decryptGCM(this.AESkey, this.iv, cipherText);
-        Log.d("EncryptDecrypt", "Decrypted "+plainData);
+        Log.d("EncryptDecrypt", "Decrypted "+ plainData);
         return plainData;
     }
 

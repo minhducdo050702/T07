@@ -7,14 +7,10 @@ data class LogWithAppAndData(
     @Embedded
     val log: Log,
     @Relation(
-        parentColumn = "id",
-        entityColumn = "app_id"
+        parentColumn = "app_id",
+        entityColumn = "id"
     )
-    val app: App,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "data_id"
-    )
-    val data: Data
+    val app: App
+
 ) {
 }

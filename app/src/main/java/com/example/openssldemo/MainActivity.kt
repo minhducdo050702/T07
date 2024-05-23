@@ -5,38 +5,61 @@ import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.openssldemo.database.data.AppDatabase
-import com.example.openssldemo.databinding.ActivityMainBinding
+
 import com.example.openssldemo.viewmodel.AppViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-    private val viewModel : AppViewModel by viewModels {
+    //private lateinit var binding: ActivityMainBinding
 
-        AppViewModel.AppViewModelFactory(AppDatabase.getDatabase(this).dataDao(),
-            AppDatabase.getDatabase(this).appDao())
-    }
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        //binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(R.layout.activity_main)
 
         val dir = ContextCompat.getExternalFilesDirs(this, null)
         val dir2 = fileList()
         for (i in dir.indices) {
-            Log.d("A", dir[i].absolutePath)
+            Log.d("A1", dir[i].absolutePath)
         }
 
         for(i in dir2.indices) {
-            Log.d("A", dir2[i])
+            Log.d("A2", dir2[i])
         }
 
-        viewModel.createNew("3", "password", "test value")
+        val keystoreController = KeystoreController(this)
+        val register = Register(this)
+        val masterKey = keystoreController.masterKey
+        if(masterKey == null) {
+            Log.d("MainActivity", "Master key not found")
+            register.genMasterKeyOnce()
+        }
+        val id = "com.example.test"
+        register.registerApp(id)
 
+        val isRegistered = keystoreController.isRegistered(id)
+
+        Log.d("MainActivity", isRegistered.toString())
+
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+        setupActionBarWithNavController(navController)
+//        GlobalScope.launch {
+//            val newID = viewModel.insert(id + 1,id,id)
+//            Log.d("MainActivity", newID.toString())
+//
+//        }
 
 
 
@@ -89,6 +112,10 @@ class MainActivity : AppCompatActivity() {
 
 
 
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
     /**

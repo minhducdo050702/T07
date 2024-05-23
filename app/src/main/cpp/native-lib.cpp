@@ -19,6 +19,14 @@
 #include <vector>
 #include "crypto.h"
 
+
+#define LOG_TAG "CRYPTO"
+//#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+//#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+//#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+//#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+
 using namespace std;
 
 const int masterKeyLength = 32; // Master key length in bytes (256 bits)
@@ -37,10 +45,16 @@ std::string genKey(string masterkey_) {
     }
 
     unsigned char aesKey[aesKeyLength];
+    unsigned char macKey[macKeyLength];
     unsigned char aesSalt[saltLength]; // Salt for AES key
+    unsigned char macSalt[saltLength]; // Salt for MAC key
     // Generate random salts for AES key and MAC key
     if (RAND_bytes(aesSalt, saltLength) != 1) {
         std::cerr << "Error generating random bytes for AES salt." << std::endl;
+        return "";
+    }
+    if (RAND_bytes(macSalt, saltLength) != 1) {
+        std::cerr << "Error generating random bytes for MAC salt." << std::endl;
         return "";
     }
 
@@ -51,8 +65,17 @@ std::string genKey(string masterkey_) {
         return "";
     }
 
+    // Derive MAC key using scrypt
+    if (EVP_PBE_scrypt(reinterpret_cast<const char*>(masterKey), masterKeyLength,
+                       macSalt, saltLength, n, r, p, 0, macKey, macKeyLength) != 1) {
+        std::cerr << "Error deriving MAC key using scrypt." << std::endl;
+        return "";
+    }
 
-    std::string key(reinterpret_cast<char*>(aesKey), aesKeyLength);
+    // Concatenate master key, AES key, and MAC key
+    std::string key(reinterpret_cast<char*>(masterKey), masterKeyLength);
+    key.append(reinterpret_cast<char*>(aesKey), aesKeyLength);
+    key.append(reinterpret_cast<char*>(macKey), macKeyLength);
 
     // Convert key to binary string
     std::string binary_key;
@@ -97,7 +120,7 @@ Java_com_example_openssldemo_EncryptDecrypt_encrypt(JNIEnv *env, jobject thiz, j
                                 (unsigned char *) plain_data_c, strlen(plain_data_c), ciphertext);
 
 
- std::string cipher_text = toHexString(ciphertext, cipher_len);
+    std::string cipher_text = toHexString(ciphertext, cipher_len);
 
     // Release memory
     env->ReleaseStringUTFChars(key, key_c);
@@ -202,7 +225,7 @@ Java_com_example_openssldemo_EncryptDecrypt_encryptGCM(JNIEnv *env, jobject thiz
     int aad_len = strlen((char *)aad_c);
     int iv_len = strlen(iv_c);
 
-    int ciphertext_len = encrypt_gcm((unsigned char*)plain_data_c, plaintext_len, aad_c, aad_len, (unsigned char*)key, (unsigned char*)iv, iv_len, ciphertext, tag);
+    int ciphertext_len = encrypt_gcm((unsigned char*)plain_data_c, plaintext_len, aad_c, aad_len, (unsigned char*)key_c, (unsigned char*)iv_c, iv_len, ciphertext, tag);
 
     // Allocate buffer for ciphertext and tag
     unsigned char ciphertext_and_tag[1000 + 16]; // Adjust sizes accordingly
@@ -232,21 +255,25 @@ Java_com_example_openssldemo_EncryptDecrypt_decryptGCM(JNIEnv *env, jobject thiz
     const char *iv_c = env->GetStringUTFChars(iv, nullptr);
     const char *ciphertext_and_tag = env->GetStringUTFChars(cipherText, nullptr);
 
-    unsigned char ciphertext[1000];
-//    unsigned char decryptedMsg[1000]= {0};
+    std::string cipher_text_and_tag_str(ciphertext_and_tag);
+    env->ReleaseStringUTFChars(cipherText, ciphertext_and_tag);
+
+    std::vector<unsigned char> cipher_text_and_tag_array(cipher_text_and_tag_str.length()/2);
+    for (size_t i = 0; i < cipher_text_and_tag_str.length(); i += 2) {
+        std::string byte = cipher_text_and_tag_str.substr(i, 2);
+        cipher_text_and_tag_array[i/2] = static_cast<unsigned char>(std::stoul(byte, nullptr, 16));
+    }
+
     std::vector<unsigned char> decryptedMsg(1000);
-    unsigned char tag[16] = {0};
+    std::vector<unsigned char> tag(cipher_text_and_tag_array.end()-16, cipher_text_and_tag_array.end());
+    std::vector<unsigned char> ciphertext(cipher_text_and_tag_array.begin(),cipher_text_and_tag_array.end()-16);
+
     unsigned char aad_c[] = "";
     int ciphertext_and_tag_len = strlen(ciphertext_and_tag);
     int aad_len = strlen((char *)aad_c);
     int iv_len = strlen(iv_c);
-    int cipher_len = ciphertext_and_tag_len - 16;
 
-    //extract ciphertext & tag from combined string
-    memcpy(ciphertext, ciphertext_and_tag, cipher_len);
-    memcpy(tag, ciphertext_and_tag + cipher_len, 16);
-
-    int decryptedtext_len = decrypt_gcm(ciphertext, cipher_len, aad_c, aad_len, tag, (unsigned char*) key,(unsigned char*) iv, iv_len, decryptedMsg.data());
+    int decryptedtext_len = decrypt_gcm(ciphertext.data(), ciphertext.size() , aad_c, aad_len, tag.data(), (unsigned char*) key_c,(unsigned char*) iv_c, iv_len, decryptedMsg.data());
 
     if (decryptedtext_len < 0) {
         env->ReleaseStringUTFChars(key, key_c);

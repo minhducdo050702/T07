@@ -54,7 +54,12 @@ public class KeystoreController {
     public String getMasterKey() throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
         String alias=" MasterKey";
         SecretKey masterKey = (SecretKey) keyStore.getKey(alias, "".toCharArray());
-        return new String(masterKey.getEncoded());
+        if(masterKey == null) {
+            return null;
+        }else {
+            return new String(masterKey.getEncoded());
+        }
+
     }
     public String getAESKey(String alias) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
         String alias2=alias+" AESKey";
@@ -97,13 +102,13 @@ public class KeystoreController {
 
 
     public boolean isRegistered(String alias) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
-        String alias1 = alias+" MasterKey";
+        String alias1 = " MasterKey";
         String alias2 = alias + " AESKey";
-        String alias3 = alias + " MACKey";
+
         SecretKey masterKey = (SecretKey) keyStore.getKey(alias1, "".toCharArray());
         SecretKey AESKey = (SecretKey) keyStore.getKey(alias2, "".toCharArray());
-        SecretKey MacKey = (SecretKey) keyStore.getKey(alias3, "".toCharArray());
-        return masterKey != null && AESKey != null && MacKey != null;
+
+        return masterKey != null && AESKey != null;
     }
 
 }

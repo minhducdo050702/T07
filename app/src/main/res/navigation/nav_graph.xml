@@ -3,26 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
-
+    app:startDestination="@id/logFragment">
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="com.example.openssldemo.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
-
+        android:id="@+id/logFragment"
+        android:name="com.example.openssldemo.ui.LogFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_log">
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            android:id="@+id/action_logFragment_to_appFragment"
+            app:destination="@id/appFragment" />
     </fragment>
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.example.openssldemo.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
-
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
-    </fragment>
+        android:id="@+id/appFragment"
+        android:name="com.example.openssldemo.ui.AppFragment"
+        android:label="List App"
+        tools:layout="@layout/fragment_app" />
 </navigation>

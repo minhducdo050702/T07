@@ -4,10 +4,10 @@
 unsigned char key[] = "01234567890123456789012345678901";
 
 /* A 128 bit IV */
-unsigned char iv[] = "0123456789012345";
+unsigned char iv[] = "2390172847198247190";
 
 /* Message to be encrypted */
-unsigned char plaintext[] = "Hello World!!!!";
+unsigned char plaintext[] = "Hello world";
 
 /* AAD */
 unsigned char aad[] = "";

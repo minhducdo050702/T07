@@ -18,7 +18,7 @@ public class HMac {
     public HMac(String alias, Context context) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableKeyException {
         KeystoreController keystoreController = new KeystoreController(context);
         this.alias = alias;
-        this.MACkey = keystoreController.getMACKey(alias);
+//        this.MACkey = keystoreController.getMACKey(alias);
         Log.d("HMac", "Created "+this.MACkey);
     }
     public String genHmac(String data) {

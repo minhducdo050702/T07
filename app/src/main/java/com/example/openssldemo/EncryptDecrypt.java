@@ -24,10 +24,23 @@ public class EncryptDecrypt {
         System.loadLibrary("openssldemo");
     }
 
+    public String convert_hex_string_to_ascii_string(String hex_string) {
+        StringBuilder ascii_string = new StringBuilder();
+        // Process the hex string in chunks of 2 characters
+        for (int i = 0; i < hex_string.length(); i += 2) {
+            // Extract 2-character hex chunk
+            String hex_byte = hex_string.substring(i, i + 2);
+            // Convert hex chunk to integer
+            int charCode = Integer.parseInt(hex_byte, 16);
+            // Convert integer to character and append
+            ascii_string.append((char) charCode);
+        }
+        return ascii_string.toString();
+    }
     public EncryptDecrypt(String alias, Context context) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         KeystoreController keystoreController = new KeystoreController(context);
         this.alias = alias;
-        this.AESkey = keystoreController.getAESKey(alias);
+        this.AESkey = convert_hex_string_to_ascii_string(keystoreController.getAESKey(alias));
         //this.iv = iv;
         Log.d("EncryptDecrypt", "Created ");
         Log.d("EncryptDecrypt", "AES Key: "+this.AESkey);

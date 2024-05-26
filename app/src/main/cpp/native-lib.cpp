@@ -18,6 +18,7 @@
 #include <sstream>
 #include <vector>
 #include "crypto.h"
+#include <bitset>
 
 
 #define LOG_TAG "CRYPTO"
@@ -31,7 +32,6 @@ using namespace std;
 
 const int masterKeyLength = 32; // Master key length in bytes (256 bits)
 const int aesKeyLength = 32;    // AES key length in bytes (256 bits)
-const int macKeyLength = 32;    // MAC key length in bytes (256 bits)
 const int saltLength = 32;      // Salt length in bytes
 const int n = 16384;            // CPU/memory cost parameter
 const int r = 8;                // Block size parameter
@@ -45,7 +45,7 @@ std::string genKey(string masterkey_) {
     }
 
     unsigned char aesKey[aesKeyLength];
-    unsigned char macKey[macKeyLength];
+   // unsigned char macKey[macKeyLength];
     unsigned char aesSalt[saltLength]; // Salt for AES key
     unsigned char macSalt[saltLength]; // Salt for MAC key
     // Generate random salts for AES key and MAC key

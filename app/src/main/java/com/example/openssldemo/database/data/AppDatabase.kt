@@ -30,5 +30,13 @@ abstract class AppDatabase : RoomDatabase() {
 
             }
         }
+
+        fun getDbPath(context: Context) : String {
+            return if(INSTANCE == null) {
+                ""
+            }else {
+                context.getDatabasePath("app_database.db").absolutePath
+            }
+        }
     }
 }

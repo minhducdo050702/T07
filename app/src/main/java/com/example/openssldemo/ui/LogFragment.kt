@@ -66,6 +66,8 @@ class LogFragment : Fragment() {
             demo()
         }
 
+        Log.d("LogFragment", "onViewCreated: ${AppDatabase.getDbPath(requireContext())}")
+
     }
     private fun demo() {
 //        val register = Register(this.context)

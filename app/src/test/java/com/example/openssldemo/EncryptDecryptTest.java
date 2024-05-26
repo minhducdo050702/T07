@@ -15,10 +15,10 @@ public class EncryptDecryptTest {
     @Test
     @DisplayName("Encrypt + Decrypt MSG")
     public void encryptTest() throws KeyStoreException {
-//        EncryptDecrypt crypto = new EncryptDecrypt();
-//        String cipherMsg = crypto.encrypt(this.key, this.iv, this.plainText);
-//
-//        String decryptedMsg = crypto.decrypt(this.key, this.iv, cipherMsg);
-//        assertEquals(this.plainText, decryptedMsg, "Msg is encrypted + decrypted");
+        EncryptDecrypt crypto = new EncryptDecrypt();
+        String cipherMsg = crypto.encrypt(this.key, this.iv, this.plainText);
+
+        String decryptedMsg = crypto.decrypt(this.key, this.iv, cipherMsg);
+        assertEquals(this.plainText, decryptedMsg, "Msg is encrypted + decrypted");
     }
 }

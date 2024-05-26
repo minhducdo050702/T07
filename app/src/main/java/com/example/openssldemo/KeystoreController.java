@@ -37,13 +37,13 @@ public class KeystoreController {
             path =  ContextCompat.getExternalFilesDirs(context, null)[0].getAbsolutePath() + "/keystore.jks";
             //load key store from file in downloads directory
             //keyStore.load(new FileInputStream("/sdcard/Download/keystore.jks"), password.toCharArray());
-            Log.d("AA", path);
+
             File f = new File(path);
             if(f.exists()) {
                 keyStore.load(Files.newInputStream(Paths.get(path)), password.toCharArray());
-                Log.d("Register","Keystore loaded successfully");
+
             }else {
-                Log.d("Register","Keystore not found");
+
                 keyStore.load(null, null);
             }
 
@@ -62,7 +62,7 @@ public class KeystoreController {
 
     }
     public String getAESKey(String alias) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-        String alias2=alias+" AESKey";
+        String alias2 = alias+" AESKey";
         SecretKey AESKey = (SecretKey) keyStore.getKey(alias2, "".toCharArray());
         return new String(AESKey.getEncoded());
     }

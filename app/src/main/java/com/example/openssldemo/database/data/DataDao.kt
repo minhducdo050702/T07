@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DataDao {
     @Query("SELECT * FROM data WHERE app_id = :appId AND data_type != 'packageID' ")
-    suspend fun getAll( appId : String): List<Data>
+    suspend fun getAll( appId : String): MutableList<Data>
 
     @Query("SELECT * FROM data WHERE data_type = :dataType AND app_id = :appId")
-    suspend fun getByType(dataType: String, appId: String): List<Data>
+    suspend fun getByType(dataType: String, appId: String): MutableList<Data>
 
     @Query("INSERT INTO data (app_id, data_type, data_value) VALUES (:appId, :dataType, :dataValue)")
      fun insert(appId: String, dataType: String, dataValue: String) : Long

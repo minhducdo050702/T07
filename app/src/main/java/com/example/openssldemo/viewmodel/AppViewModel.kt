@@ -8,6 +8,8 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.openssldemo.database.data.App
@@ -49,10 +51,11 @@ class AppViewModel(
             .putString(CreateNewKeyWorker.WORK_NAME, appId)
             .build()
 
-        val workRequest = PeriodicWorkRequestBuilder<CreateNewKeyWorker>(duration, unit)
+        val workRequest = OneTimeWorkRequestBuilder<CreateNewKeyWorker>()
             .setInputData(data)
+            .setInitialDelay(duration, unit)
             .build()
-        workerManager.enqueueUniquePeriodicWork(appId, ExistingPeriodicWorkPolicy.UPDATE, workRequest)
+        workerManager.enqueueUniqueWork(appId, ExistingWorkPolicy.REPLACE, workRequest)
 
 
     }

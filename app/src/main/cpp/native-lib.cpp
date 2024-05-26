@@ -66,21 +66,21 @@ std::string genKey(string masterkey_) {
     }
 
     // Derive MAC key using scrypt
-    if (EVP_PBE_scrypt(reinterpret_cast<const char*>(masterKey), masterKeyLength,
-                       macSalt, saltLength, n, r, p, 0, macKey, macKeyLength) != 1) {
-        std::cerr << "Error deriving MAC key using scrypt." << std::endl;
-        return "";
-    }
+//    if (EVP_PBE_scrypt(reinterpret_cast<const char*>(masterKey), masterKeyLength,
+//                       macSalt, saltLength, n, r, p, 0, macKey, macKeyLength) != 1) {
+//        std::cerr << "Error deriving MAC key using scrypt." << std::endl;
+//        return "";
+//    }
 
     // Concatenate master key, AES key, and MAC key
-    std::string key(reinterpret_cast<char*>(masterKey), masterKeyLength);
-    key.append(reinterpret_cast<char*>(aesKey), aesKeyLength);
-    key.append(reinterpret_cast<char*>(macKey), macKeyLength);
+//    std::string key(reinterpret_cast<char*>(masterKey), masterKeyLength);
+//    key.append(reinterpret_cast<char*>(aesKey), aesKeyLength);
+    //key.append(reinterpret_cast<char*>(macKey), macKeyLength);
 
     // Convert key to binary string
     std::string binary_key;
-    for (size_t i = 0; i < key.size(); i++) {
-        binary_key += std::bitset<8>(key[i]).to_string();
+    for (size_t i = 0; i < aesKeyLength; i++) {
+        binary_key += std::bitset<8>(aesKey[i]).to_string();
     }
     return binary_key;
 }

@@ -37,6 +37,10 @@ class CreateNewKeyWorker(
                     data.dataValue = plainText
                     Log.d("WORKER","${data.dataValue} value")
                 }
+                for (data in dataList) {
+
+                    Log.d("WORKER","${data.dataValue} value")
+                }
 
                 register.registerApp(appId)
 

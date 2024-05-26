@@ -12,10 +12,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.openssldemo.R
+import com.example.openssldemo.Register
 import com.example.openssldemo.adapter.LogAdapter
 import com.example.openssldemo.database.data.AppDatabase
 import com.example.openssldemo.databinding.FragmentLogBinding
 import com.example.openssldemo.viewmodel.AppViewModel
+import java.util.concurrent.TimeUnit
 
 
 class LogFragment : Fragment() {
@@ -60,6 +62,15 @@ class LogFragment : Fragment() {
             handleClick()
         }
 
+        binding.demo.setOnClickListener {
+            demo()
+        }
+
+    }
+    private fun demo() {
+//        val register = Register(this.context)
+//        register.registerApp("com.example.clientapp")
+        viewModel.scheduleWorker(15, TimeUnit.SECONDS, "com.example.clientapp")
     }
     private fun handleClick() {
         val action = LogFragmentDirections.actionLogFragmentToAppFragment()

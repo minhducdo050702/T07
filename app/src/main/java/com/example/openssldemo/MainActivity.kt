@@ -45,12 +45,6 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity", "Master key not found")
             register.genMasterKeyOnce()
         }
-        val id = "com.example.test"
-        register.registerApp(id)
-
-        val isRegistered = keystoreController.isRegistered(id)
-
-        Log.d("MainActivity", isRegistered.toString())
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController

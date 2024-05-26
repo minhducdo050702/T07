@@ -62,18 +62,18 @@ class LogFragment : Fragment() {
             handleClick()
         }
 
-        binding.demo.setOnClickListener {
-            demo()
-        }
-
-        Log.d("LogFragment", "onViewCreated: ${AppDatabase.getDbPath(requireContext())}")
+//        binding.demo.setOnClickListener {
+//            demo()
+//        }
+//
+//        Log.d("LogFragment", "onViewCreated: ${AppDatabase.getDbPath(requireContext())}")
 
     }
-    private fun demo() {
+//    private fun demo() {
 //        val register = Register(this.context)
 //        register.registerApp("com.example.clientapp")
-        viewModel.scheduleWorker(15, TimeUnit.SECONDS, "com.example.clientapp")
-    }
+//       // viewModel.scheduleWorker(15, TimeUnit.SECONDS, "com.example.clientapp")
+//    }
     private fun handleClick() {
         val action = LogFragmentDirections.actionLogFragmentToAppFragment()
         findNavController().navigate(action)

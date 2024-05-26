@@ -59,13 +59,9 @@ class MainService : Service() {
                         scheduleWorker(15, TimeUnit.MINUTES, packageID)
                         return "You have registered successful."
                     }
-
                 }catch (e: Exception) {
                     return e.message.toString()
                 }
-
-
-
             } else {
                 Log.d(TAG, "packageID null")
                 return "You must submit identification information to register"

@@ -5,7 +5,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.io.IOException;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 
 public class EncryptDecryptTest {
     private final String key = "01234567890123456789012345678901";
@@ -14,7 +18,7 @@ public class EncryptDecryptTest {
 
     @Test
     @DisplayName("Encrypt + Decrypt MSG")
-    public void encryptTest() throws KeyStoreException {
+    public void encryptTest() throws KeyStoreException, UnrecoverableKeyException, CertificateException, IOException, NoSuchAlgorithmException {
         EncryptDecrypt crypto = new EncryptDecrypt();
         String cipherMsg = crypto.encrypt(this.key, this.iv, this.plainText);
 

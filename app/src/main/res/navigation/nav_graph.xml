@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/logFragment">
+    <fragment
+        android:id="@+id/logFragment"
+        android:name="com.example.openssldemo.ui.LogFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_log">
+        <action
+            android:id="@+id/action_logFragment_to_appFragment"
+            app:destination="@id/appFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/appFragment"
+        android:name="com.example.openssldemo.ui.AppFragment"
+        android:label="List App"
+        tools:layout="@layout/fragment_app" />
+</navigation>

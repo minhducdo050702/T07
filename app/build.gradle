@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id 'kotlin-kapt'
+    alias(libs.plugins.safeArg)
+
 }
 
 android {
@@ -50,13 +52,16 @@ android {
     }
     buildFeatures {
         prefab = true
-        viewBinding true
+        dataBinding =  true
         aidl = true
     }
 }
 
 dependencies {
+    implementation libs.androidx.navigation.fragment.ktx
+    implementation libs.androidx.navigation.ui.ktx
     def room_version = "2.6.1"
+
     implementation ("com.android.ndk.thirdparty:openssl:1.1.1l-beta-1")
     implementation ("com.android.ndk.thirdparty:curl:7.79.1-beta-1")
     kapt "androidx.room:room-compiler:$room_version"
@@ -71,4 +76,18 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation(libs.androidx.work.runtime.ktx)
+
+
+    // optional - Test helpers
+    androidTestImplementation libs.androidx.work.testing
+
+    //
+    androidTestImplementation libs.androidx.core.testing
+    androidTestImplementation libs.androidx.junit.v113
+    androidTestImplementation libs.androidx.rules
+    androidTestImplementation libs.androidx.runner
+    
 }

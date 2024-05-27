@@ -26,7 +26,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class KeystoreController {
     KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
     String path ;
-   // String path = "/sdcard/Download/keystore.jks";
     String password = "password";
     static {
         System.loadLibrary("openssldemo");
@@ -35,15 +34,10 @@ public class KeystoreController {
     public KeystoreController(Context context) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             path =  ContextCompat.getExternalFilesDirs(context, null)[0].getAbsolutePath() + "/keystore.jks";
-            //load key store from file in downloads directory
-            //keyStore.load(new FileInputStream("/sdcard/Download/keystore.jks"), password.toCharArray());
-
             File f = new File(path);
             if(f.exists()) {
                 keyStore.load(Files.newInputStream(Paths.get(path)), password.toCharArray());
-
             }else {
-
                 keyStore.load(null, null);
             }
 
@@ -75,7 +69,6 @@ public class KeystoreController {
         KeyStore.SecretKeyEntry masterSecretEntry=
                 new KeyStore.SecretKeyEntry(masterSecretKey);
         keyStore.setEntry(alias, masterSecretEntry, null);
-        //save key store to file in downloads directory
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 keyStore.store(Files.newOutputStream(Paths.get(path)), password.toCharArray());

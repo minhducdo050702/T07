@@ -1,6 +1,5 @@
 #include <jni.h>
 #include <string>
-#include <iostream>
 #include <openssl/rand.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
@@ -9,13 +8,8 @@
 #include <cstring>
 #include <openssl/aes.h>
 #include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/aes.h>
-#include <openssl/err.h>
 #include <string.h>
 #include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <vector>
 #include "crypto.h"
 #include <bitset>
@@ -39,44 +33,22 @@ const int p = 1;                // Parallelization parameter
 
 std::string genKey(string masterkey_) {
     unsigned char masterKey[masterKeyLength];
-    //convert masterkey bit string to unsigned char then copy to masterKey
+    unsigned char aesKey[aesKeyLength];
+    unsigned char aesSalt[saltLength];
     for (int i = 0; i < masterKeyLength; i++) {
         masterKey[i] = std::bitset<8>(masterkey_.substr(i * 8, 8)).to_ulong();
     }
-
-    unsigned char aesKey[aesKeyLength];
-   // unsigned char macKey[macKeyLength];
-    unsigned char aesSalt[saltLength]; // Salt for AES key
-    unsigned char macSalt[saltLength]; // Salt for MAC key
-    // Generate random salts for AES key and MAC key
+    // Generate random salts for AES key
     if (RAND_bytes(aesSalt, saltLength) != 1) {
         std::cerr << "Error generating random bytes for AES salt." << std::endl;
         return "";
     }
-    if (RAND_bytes(macSalt, saltLength) != 1) {
-        std::cerr << "Error generating random bytes for MAC salt." << std::endl;
-        return "";
-    }
-
     // Derive AES key using scrypt
     if (EVP_PBE_scrypt(reinterpret_cast<const char*>(masterKey), masterKeyLength,
                        aesSalt, saltLength, n, r, p, 0, aesKey, aesKeyLength) != 1) {
         std::cerr << "Error deriving AES key using scrypt." << std::endl;
         return "";
     }
-
-    // Derive MAC key using scrypt
-//    if (EVP_PBE_scrypt(reinterpret_cast<const char*>(masterKey), masterKeyLength,
-//                       macSalt, saltLength, n, r, p, 0, macKey, macKeyLength) != 1) {
-//        std::cerr << "Error deriving MAC key using scrypt." << std::endl;
-//        return "";
-//    }
-
-    // Concatenate master key, AES key, and MAC key
-//    std::string key(reinterpret_cast<char*>(masterKey), masterKeyLength);
-//    key.append(reinterpret_cast<char*>(aesKey), aesKeyLength);
-    //key.append(reinterpret_cast<char*>(macKey), macKeyLength);
-
     // Convert key to binary string
     std::string binary_key;
     for (size_t i = 0; i < aesKeyLength; i++) {
@@ -91,8 +63,6 @@ std::string genMasterKey() {
         std::cerr << "Error generating random bytes for master key." << std::endl;
         return "";
     }
-
-    // Convert master key to binary string
     std::string binary_master_key;
     for (size_t i = 0; i < masterKeyLength; i++) {
         binary_master_key += std::bitset<8>(masterKey[i]).to_string();
@@ -106,93 +76,10 @@ Java_com_example_openssldemo_MainActivity_stringFromJNI(JNIEnv *env, jobject thi
     return env->NewStringUTF("Hello from JNI!");
 }
 
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_example_openssldemo_EncryptDecrypt_encrypt(JNIEnv *env, jobject thiz, jstring key,
-                                                    jstring iv, jstring plain_data) {
-
-    // Convert the key, IV, and plain_data to C++ unsigned char arrays
-    const char *key_c = env->GetStringUTFChars(key, nullptr);
-    const char *iv_c = env->GetStringUTFChars(iv, nullptr);
-    const char *plain_data_c = env->GetStringUTFChars(plain_data, nullptr);
-    unsigned char ciphertext[1000]= {0};
-    int cipher_len= encrypt_CBC((unsigned char *) key_c, (unsigned char *) iv_c,
-                                (unsigned char *) plain_data_c, strlen(plain_data_c), ciphertext);
-
-
-    std::string cipher_text = toHexString(ciphertext, cipher_len);
-
-    // Release memory
-    env->ReleaseStringUTFChars(key, key_c);
-    env->ReleaseStringUTFChars(iv, iv_c);
-    env->ReleaseStringUTFChars(plain_data, plain_data_c);
-
-    // Return the cipher_text as a Java string
-    return env->NewStringUTF(cipher_text.c_str());
-}
-
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_example_openssldemo_EncryptDecrypt_decrypt(JNIEnv *env, jobject thiz, jstring key,
-                                                    jstring iv, jstring cipher_text) {
-
-    const char *key_c = env->GetStringUTFChars(key, nullptr);
-    const char *iv_c = env->GetStringUTFChars(iv, nullptr);
-    const char *cipher_text_c = env->GetStringUTFChars(cipher_text, nullptr);
-    std::string cipher_text_str(cipher_text_c);
-    env->ReleaseStringUTFChars(cipher_text, cipher_text_c);
-
-    std::vector<unsigned char> cipher_text_array(cipher_text_str.length()/2);
-    for (size_t i = 0; i < cipher_text_str.length(); i += 2) {
-        std::string byte = cipher_text_str.substr(i, 2);
-        cipher_text_array[i/2] = static_cast<unsigned char>(std::stoul(byte, nullptr, 16));
-    }
-
-    std::vector<unsigned char> decrypted(1000);
-    int decrypted_len = decrypt_CBC((unsigned char*)key_c, (unsigned char*)iv_c, cipher_text_array.data(),
-                                    cipher_text_array.size(), decrypted.data());
-
-    env->ReleaseStringUTFChars(key, key_c);
-    env->ReleaseStringUTFChars(iv, iv_c);
-
-
-
-    decrypted[decrypted_len] = '\0'; // Ensure null-termination
-
-    return env->NewStringUTF(reinterpret_cast<char*>(decrypted.data()));
-}
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_example_openssldemo_HMac_genHmac(JNIEnv *env, jobject thiz, jstring data, jstring key) {
-    const char *data_ = env->GetStringUTFChars(data, nullptr);
-    const char *key_ = env->GetStringUTFChars(key, nullptr);
-    string hmac = genHMAC(data_, key_);
-    env->ReleaseStringUTFChars(data, data_);
-    env->ReleaseStringUTFChars(key, key_);
-    return env->NewStringUTF(hmac.c_str());
-}
-extern "C"
-JNIEXPORT jint JNICALL
-Java_com_example_openssldemo_HMac_verifyHmac(JNIEnv *env, jobject thiz, jstring data, jstring key,
-                                             jstring hmac) {
-
-    const char *data_ = env->GetStringUTFChars(data, nullptr);
-    const char *key_ = env->GetStringUTFChars(key, nullptr);
-    const char *hmac_ = env->GetStringUTFChars(hmac, nullptr);
-    int result = checkHMAC(data_, key_, hmac_);
-    env->ReleaseStringUTFChars(data, data_);
-    env->ReleaseStringUTFChars(key, key_);
-    env->ReleaseStringUTFChars(hmac, hmac_);
-    return result;
-
-}
-
-
 
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_example_openssldemo_Register_genKey(JNIEnv *env, jobject thiz, jstring master_key_) {
-
     const char *master_key = env->GetStringUTFChars(master_key_, nullptr);
     //convert master_key to string
     string master_key_str(master_key);
@@ -203,8 +90,6 @@ Java_com_example_openssldemo_Register_genKey(JNIEnv *env, jobject thiz, jstring 
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_example_openssldemo_Register_genMasterKey(JNIEnv *env, jobject thiz) {
-
-    // Generate a random master key
     std::string master_key = genMasterKey();
     return env->NewStringUTF(master_key.c_str());
 }

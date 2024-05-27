@@ -42,12 +42,7 @@ public class Register {
         String AESKey=this.genKey(keystoreController.getMasterKey());
         String AESKeyHex=convert_binary_string_to_hex_string(AESKey);
         keystoreController.setAESKey(alias,AESKeyHex);
-        Log.d("Register","App registered successfully");
-        String AESKey1= keystoreController.getAESKey(alias);
-        Log.d("Register","AES Key: "+AESKey1);
-
     }
-    //ham nay chi duoc goi 1 lan luc cai dat service
     public String genMasterKeyOnce() throws KeyStoreException {
         String masterKey = genMasterKey();
         keystoreController.setMasterKey(masterKey);

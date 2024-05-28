@@ -126,7 +126,7 @@ class MainService : Service() {
                 val keystoreController = KeystoreController(applicationContext)
                 val isRegistered = keystoreController.isRegistered(packageID)
                 if (!isRegistered) {
-                    logDao.insert(packageID, "LOAD", Calendar.getInstance().time, "Failed")
+                    //logDao.insert(packageID, "LOAD", Calendar.getInstance().time, "Failed")
                     return "You are not registered yet, please register to load data!"
                 }
 
@@ -150,7 +150,72 @@ class MainService : Service() {
                 if(packageID != null ) {
                     logDao.insert(packageID, "STORE", Calendar.getInstance().time, "Failed")
                 }
+
+
                return "Requested data is missing!"
+            }
+        }
+
+        override fun edit(packageID: String?, dataType: String?, dataValue: String?): String {
+            if(packageID != null && dataType != null && dataValue != null) {
+                val keyStoreController = KeystoreController(applicationContext)
+                Log.d(TAG, "EDIT REQUESTED $packageID")
+                val isRegistered = keyStoreController.isRegistered(packageID)
+                if(!isRegistered) {
+                    return "You are not registered yet, please register to store data!"
+                }
+                return runBlocking {
+                    val data = dataDao.getByType(dataType, packageID)
+                    if(data.isEmpty()) {
+                        logDao.insert(packageID, "EDIT", Calendar.getInstance().time, "Failed")
+                        "You have not stored this type of data"
+                    }else {
+                        Log.d(TAG, "EDIT DATA SIZE ${data.size}")
+                        val cryptoModule = EncryptDecrypt(packageID, applicationContext)
+                        val encryptedData = cryptoModule.encrypt(dataValue)
+                        val rowID = dataDao.update(packageID, dataType, encryptedData)
+                        Log.d(TAG, "ROW ID $rowID")
+                        logDao.insert(packageID, "EDIT", Calendar.getInstance().time, "Successful")
+                        val newData = dataDao.getByType(dataType, packageID)
+                        val plaintext = cryptoModule.decrypt(newData[0].dataValue)
+                        plaintext
+                    }
+
+
+
+                }
+            }else {
+                if(packageID != null) {
+                    logDao.insert(packageID, "EDIT", Calendar.getInstance().time, "Failed")
+                }
+                return "Requested data is missing!"
+            }
+        }
+
+        override fun deleteData(packageID: String?, dataType: String?): String {
+            if(packageID != null && dataType != null) {
+                val keyStoreController = KeystoreController(applicationContext)
+                val isRegistered = keyStoreController.isRegistered(packageID)
+                if(!isRegistered) {
+                    return "You are not registered yet, please register to store data!"
+                }
+                return runBlocking {
+                    val rowID = dataDao.deleteByType(packageID, dataType)
+                    if(rowID > 0) {
+                        logDao.insert(packageID, "DELETE", Calendar.getInstance().time, "Successful")
+                        "You have deleted data successfully"
+                    }else {
+                        logDao.insert(packageID, "DELETE", Calendar.getInstance().time, "Failed")
+                        "You have not stored this type of data"
+                    }
+
+                }
+
+            }else {
+                if(packageID != null) {
+                    logDao.insert(packageID, "DELETE", Calendar.getInstance().time, "Failed")
+                }
+                return "Requested data is missing!"
             }
         }
     }
@@ -163,7 +228,6 @@ class MainService : Service() {
         intent?.getStringExtra(PACKAGE_ID).let {
             Log.d(TAG, "BINDING TO ${it.toString()}")
         }
-
         return binder
     }
 

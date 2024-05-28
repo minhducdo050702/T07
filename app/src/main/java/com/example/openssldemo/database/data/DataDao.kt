@@ -20,9 +20,9 @@ interface DataDao {
     suspend fun deleteAll(appId: String)
 
     @Query("DELETE FROM data WHERE app_id = :appId AND data_type = :dataType")
-    suspend fun deleteByType(appId: String, dataType: String)
+    suspend fun deleteByType(appId: String, dataType: String) : Int
 
     @Query("UPDATE data SET data_value = :dataValue WHERE app_id = :appId AND data_type = :dataType")
-    suspend fun update(appId: String, dataType: String, dataValue: String)
+    suspend fun update(appId: String, dataType: String, dataValue: String) : Int
 
 }

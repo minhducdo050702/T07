@@ -46,7 +46,7 @@ class MainService : Service() {
                     if (isRegistered) {
 
                         val currentTime = Date()
-                        logDao.insert(packageID,"REGISTER",currentTime, "Fail" )
+                        logDao.insert(packageID,"REGISTER",currentTime, "Failed" )
                         return "You have already registered."
                     } else {
                         Log.d(TAG, "REGISTERING $packageID")

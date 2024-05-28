@@ -29,14 +29,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val dir = ContextCompat.getExternalFilesDirs(this, null)
-        val dir2 = fileList()
+        val dir2 = filesDir
         for (i in dir.indices) {
             Log.d("A1", dir[i].absolutePath)
         }
 
-        for(i in dir2.indices) {
-            Log.d("A2", dir2[i])
-        }
+        Log.d("A2", dir2.absolutePath)
 
         val keystoreController = KeystoreController(this)
         val register = Register(this)

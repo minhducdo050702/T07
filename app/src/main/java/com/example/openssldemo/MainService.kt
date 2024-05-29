@@ -133,7 +133,7 @@ class MainService : Service() {
                 return runBlocking {
                     val data = dataDao.getByType(dataType, packageID)
                     if(data.isEmpty()) {
-                        logDao.insert(packageID, "STORE", Calendar.getInstance().time, "Failed")
+                        logDao.insert(packageID, "LOAD", Calendar.getInstance().time, "Failed")
                         "You have not stored this type of data"
                     }else {
                         Log.d(TAG, "LOAD DATA SIZE ${data.size}")
